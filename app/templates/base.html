@@ -1,0 +1,638 @@
+<!doctype html>
+<html lang="es" data-theme="autumn">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block title %} Bazar Stereo {% endblock %}</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@5"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css"
+            rel="stylesheet"
+            type="text/css"
+        />
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='style/app.css') }}"
+        />
+        <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    </head>
+    <body class="min-h-screen flex flex-col">
+        <!-- Navbar -->
+        <div
+            class="navbar bg-base-100/70 backdrop-blur-lg border-b border-base-content/10 px-4 py-2 sticky top-0 z-50"
+        >
+            <div class="navbar-start">
+                <!-- Pa cellulares -->
+                <div class="dropdown">
+                    <div
+                        tabindex="0"
+                        role="button"
+                        class="btn btn-ghost btn-sm lg:hidden"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6h16M4 12h8m-8 6h16"
+                            />
+                        </svg>
+                    </div>
+                    <ul
+                        tabindex="0"
+                        class="menu menu-sm dropdown-content mt-2 z-50 p-2 shadow bg-base-100 rounded-box w-52"
+                    >
+                        <li>
+                            <a href="{{ url_for('discos.discos') }}">Discos</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('subastas.subastas') }}"
+                                >Subastas</a
+                            >
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Logo -->
+                <a
+                    href="{{ url_for('main.inicio') }}"
+                    class="btn btn-link p-0 ml-2"
+                >
+                    <img
+                        class="h-8 md:h-10 w-auto"
+                        src="{{ url_for('static', filename='img/logo_bazar_stereo.svg') }}"
+                        alt="Bazar Stereo"
+                    />
+                </a>
+            </div>
+
+            <!-- Pa pantallas grandes -->
+            <div class="navbar-center hidden lg:flex">
+                <ul class="menu menu-horizontal px-1 gap-2 font-bold">
+                    <li><a href="{{ url_for('discos.discos') }}">Discos</a></li>
+                    <li>
+                        <a href="{{ url_for('subastas.subastas') }}"
+                            >Subastas</a
+                        >
+                    </li>
+                </ul>
+            </div>
+
+            <!-- usuario + carrito -->
+            <div class="navbar-end gap-2">
+                {% if current_user.is_authenticated %}
+
+                <!-- Nombre del usuario -->
+                <span class="hidden md:inline text-sm font-medium opacity-70">
+                    Bienvenido <strong>{{ current_user.nombre }}</strong>
+                </span>
+
+                <!-- Avatar con dropdown -->
+                <div class="dropdown dropdown-end">
+                    <div
+                        tabindex="0"
+                        role="button"
+                        class="btn btn-ghost btn-circle avatar"
+                    >
+                        <div class="w-10 rounded-full overflow-hidden">
+                            {% if current_user.icono_usuario %}
+                            <img
+                                src="{{ current_user.icono_usuario }}"
+                                alt="{{ current_user.nombre }}"
+                                class="w-full h-full object-cover"
+                            />
+                            {% else %}
+                            <div
+                                class="w-full h-full bg-primary text-primary-content flex items-center justify-center font-bold text-lg"
+                            >
+                                {{ current_user.nombre[0] | upper }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <ul
+                        tabindex="0"
+                        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow"
+                    >
+                        <li class="menu-title">{{ current_user.nombre }}</li>
+                        <li>
+                            <a href="{{ url_for('mi_cuenta.mi_cuenta') }}"
+                                >Mi cuenta</a
+                            >
+                        </li>
+                        <li class="divider"></li>
+                        <li>
+                            <a
+                                href="{{ url_for('auth.logout') }}"
+                                class="text-error"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                    />
+                                </svg>
+                                Cerrar sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                {% else %}
+                <!-- Botón de login si no esta logeado -->
+                <label for="login-modal" class="btn btn-ghost btn-sm"
+                    >Iniciar sesión</label
+                >
+                {% endif %}
+
+                <!-- Carrito -->
+                <a
+                    href="{#{ url_for('carrito.ver_carrito') }#}"
+                    class="btn btn-ghost btn-circle indicator"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+                        />
+                    </svg>
+                    <span
+                        id="cart-badge"
+                        class="badge badge-sm badge-secondary indicator-item"
+                    >
+                        {{ cart_count }}
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="grow">
+            {% with messages = get_flashed_messages(with_categories=true) %} {%
+            if messages %}
+            <div
+                class="fixed bottom-4 right-4 z-[200] flex flex-col gap-3 w-80"
+            >
+                {% for category, message in messages %}
+                <div
+                    class="alert shadow-xl border border-white/20 bg-base-100/40 backdrop-blur-md text-base-content rounded-box px-4 py-3 animate-[fadeIn_.3s_ease-out]"
+                    role="alert"
+                >
+                    <!-- Icono según categoría -->
+                    {% if category == 'success' %}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-success shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    {% elif category == 'error' %}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-error shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    {% elif category == 'warning' %}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-warning shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                    </svg>
+                    {% else %}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-info shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    {% endif %}
+
+                    <span class="text-sm font-medium">{{ message }}</span>
+
+                    <!-- Botón cerrar manual -->
+                    <button
+                        onclick="this.parentElement.remove()"
+                        class="btn btn-ghost btn-xs btn-circle ml-auto opacity-70 hover:opacity-100"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+
+            <script>
+                setTimeout(() => {
+                    document.querySelectorAll(".alert").forEach((el) => {
+                        el.style.transition =
+                            "opacity .5s ease, transform .5s ease";
+                        el.style.opacity = "0";
+                        el.style.transform = "translateY(10px)";
+                        setTimeout(() => el.remove(), 500);
+                    });
+                }, 4000);
+            </script>
+            {% endif %} {% endwith %} {% block content %}
+            <!-- carga htmx pa cuando se tarde demasiado -->
+            <div class="htmx-indicator fixed top-4 right-4 z-50">
+                <span
+                    class="loading loading-spinner loading-md text-accent"
+                ></span>
+            </div>
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer
+            class="footer sm:footer-horizontal footer-center bg-neutral text-neutral-content py-6 border-t border-neutral-700/40"
+        >
+            <aside>
+                <p class="text-sm opacity-80 tracking-wide">
+                    Copyright ©2026 — Todos los derechos reservados por
+                    <strong class="font-semibold">Bazar Stereo</strong>.
+                </p>
+            </aside>
+        </footer>
+        <div id="htmx-flash"></div>
+
+        <div id="htmx-flash" class="fixed bottom-4 right-4 z-[200] w-80"></div>
+        <script>
+            document.body.addEventListener("htmx:afterRequest", function (e) {
+                if (!e.detail.successful) return;
+                var count = e.detail.xhr.getResponseHeader("X-Cart-Count");
+                if (count !== null) {
+                    document.getElementById("cart-badge").textContent = count;
+                }
+            });
+        </script>
+
+        <!-- ═══ Modal de éxito: compra o subasta ganada ═══ -->
+        <
+        <dialog id="success-modal" class="modal modal-middle">
+            <div
+                class="modal-box max-w-md p-0 bg-base-100 shadow-2xl border border-success/30 overflow-hidden text-center relative"
+            >
+                <button
+                    type="button"
+                    onclick="document.getElementById('success-modal').close()"
+                    class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
+                >
+                    ✕
+                </button>
+
+                <div class="bg-success/10 p-8 pb-6 pt-12">
+                    <div
+                        class="w-20 h-20 rounded-full bg-success flex items-center justify-center mx-auto mb-4 shadow-lg"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-10 w-10 text-success-content"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                    </div>
+                    <h3
+                        class="text-2xl font-black text-success uppercase tracking-tight"
+                    >
+                        ¡Felicidades!
+                    </h3>
+                </div>
+
+                <div class="p-6 pt-4">
+                    <p
+                        class="text-base-content/80 mb-2 text-lg font-medium"
+                        id="success-modal-message"
+                    >
+                        Operación exitosa
+                    </p>
+                    <p class="text-sm text-base-content/50 mb-6">
+                        El disco ya es tuyo. Revisa tu cuenta para ver mas
+                        detalles.
+                    </p>
+                    <div class="flex flex-col gap-3">
+                        <button
+                            onclick="
+                                document.getElementById('success-modal').close()
+                            "
+                            class="btn btn-ghost btn-sm rounded-full"
+                        >
+                            Seguir navegando
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
+            </form>
+        </dialog>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const modal = document.getElementById("success-modal");
+                const msgEl = document.getElementById("success-modal-message");
+                if (!modal || !msgEl) return;
+
+                // Solo interceptar flashes específicos de COMPRA REALIZADA
+                const toastContainer = document.querySelector(
+                    ".fixed.bottom-4.right-4.z-\\[200\\]",
+                );
+                if (!toastContainer) return;
+
+                const alerts = Array.from(
+                    toastContainer.querySelectorAll(".alert"),
+                );
+                let opened = false;
+
+                alerts.forEach(function (alert) {
+                    const text = alert.textContent.toLowerCase().trim();
+                    const span = alert.querySelector("span");
+                    const originalMsg = span ? span.textContent.trim() : "";
+
+                    // SOLO compras reales (no subastas creadas, pujas, etc.)
+                    const esCompraDirecta =
+                        text.includes("compraste") && text.includes("$");
+                    const esCompraCarrito = text.includes(
+                        "compra realizada con éxito",
+                    );
+
+                    if (esCompraDirecta || esCompraCarrito) {
+                        msgEl.textContent =
+                            originalMsg || "¡Compra realizada con éxito!";
+                        alert.style.display = "none";
+                        if (!opened) {
+                            modal.showModal();
+                            opened = true;
+                        }
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
+
+<!-- Modal para el login -->
+<input type="radio" name="modal-toggle" id="login-modal" class="modal-toggle" />
+
+<div class="modal">
+    <div
+        class="modal-box max-w-md p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-hidden"
+    >
+        <label
+            for="modal-close"
+            class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+                />
+            </svg>
+        </label>
+
+        <form action="{#{ url_for('auth.login') }#}" method="POST">
+            <input
+                type="hidden"
+                name="next"
+                value="{{ request.args.get('next') or request.path }}"
+            />
+            <div class="p-8 pt-12">
+                <h3
+                    class="text-2xl sm:text-3xl text-center font-bold mb-8 text-secondary"
+                >
+                    ¡Bienvenido de vuelta!
+                </h3>
+
+                <div class="form-control w-full mb-5">
+                    <label class="label">
+                        <span class="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                        type="email"
+                        name="correo"
+                        placeholder="correo@ejemplo.com"
+                        class="input input-bordered w-full focus:input-secondary transition-colors"
+                    />
+                </div>
+
+                <div class="form-control w-full mb-6">
+                    <label class="label">
+                        <span class="label-text font-medium">Contraseña</span>
+                    </label>
+                    <input
+                        type="password"
+                        name="contraseña"
+                        placeholder="••••••••"
+                        class="input input-bordered w-full focus:input-secondary transition-colors"
+                    />
+                </div>
+
+                <button
+                    class="btn btn-secondary w-full mb-4 shadow-md hover:shadow-lg"
+                >
+                    Iniciar Sesión
+                </button>
+
+                <p class="text-center text-sm mt-4">
+                    ¿No tienes cuenta?
+                    <label
+                        for="signup-modal"
+                        class="link link-accent font-semibold cursor-pointer"
+                        >Regístrate</label
+                    >
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para el registro -->
+<input
+    type="radio"
+    name="modal-toggle"
+    id="signup-modal"
+    class="modal-toggle"
+/>
+
+<div class="modal">
+    <div
+        class="modal-box max-w-md p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-hidden"
+    >
+        <label
+            for="modal-close"
+            class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+                />
+            </svg>
+        </label>
+
+        <form action="{#{ url_for('auth.register') }#}" method="POST">
+            <input
+                type="hidden"
+                name="next"
+                value="{{ request.args.get('next') or request.path }}"
+            />
+            <div class="p-8 pt-12">
+                <h3
+                    class="text-2xl sm:text-3xl text-center font-bold mb-8 text-primary"
+                >
+                    ¡Hola!
+                </h3>
+
+                <div class="form-control w-full mb-5">
+                    <label class="label">
+                        <span class="label-text font-medium"
+                            >Nombre de usuario</span
+                        >
+                    </label>
+                    <input
+                        type="text"
+                        name="nombre"
+                        placeholder="Tu nombre"
+                        required
+                        class="input input-bordered w-full focus:input-primary transition-colors"
+                    />
+                </div>
+
+                <div class="form-control w-full mb-5">
+                    <label class="label">
+                        <span class="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                        type="email"
+                        name="correo"
+                        placeholder="correo@ejemplo.com"
+                        class="input input-bordered w-full focus:input-primary transition-colors"
+                    />
+                </div>
+
+                <div class="form-control w-full mb-6">
+                    <label class="label">
+                        <span class="label-text font-medium">Contraseña</span>
+                    </label>
+                    <input
+                        type="password"
+                        placeholder="••••••••"
+                        name="contraseña"
+                        class="input input-bordered w-full focus:input-primary transition-colors"
+                    />
+                </div>
+
+                <button
+                    class="btn btn-primary w-full mb-4 shadow-md hover:shadow-lg"
+                >
+                    ¡Créame una cuenta!
+                </button>
+
+                <p class="text-center text-sm mt-4">
+                    ¿Ya tienes cuenta?
+                    <label
+                        for="login-modal"
+                        class="link link-accent font-semibold cursor-pointer"
+                        >Inicia sesión</label
+                    >
+                </p>
+            </div>
+        </form>
+    </div>
+</div>

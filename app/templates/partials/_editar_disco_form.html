@@ -1,0 +1,85 @@
+<div class="modal-box max-w-2xl p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-auto max-h-[90vh]">
+    <div class="bg-accent p-6 text-secondary-content">
+        <h3 class="text-2xl font-bold flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 16 16">
+                <path d="M0 0h16v16H0z" fill="none"/>
+                <path fill="currentColor" d="M8 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 8 6m0 3a1 1 0 1 1 0-2a1 1 0 0 1 0 2m0-7a6 6 0 1 0 0 12A6 6 0 0 0 8 2"/>
+            </svg>
+            Editar Disco
+        </h3>
+        <p class="text-sm opacity-80 mt-2">
+            Modifica los datos de <strong>{{ disco.titulo }}</strong>.
+        </p>
+    </div>
+
+    <form hx-post="{{ url_for('vendedor.editar_disco', id_disco=disco.id_disco) }}"
+          hx-target="#mis-publicaciones"
+          enctype="multipart/form-data"
+          class="p-8 space-y-5"
+          hx-on::after-request="if(event.detail.successful) { document.getElementById('editar_disco').close(); }">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Título</span></label>
+                <input type="text" name="titulo" value="{{ disco.titulo }}" class="input input-bordered focus:input-secondary w-full" required />
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Artista</span></label>
+                <input type="text" name="artista" value="{{ disco.artista }}" class="input input-bordered focus:input-secondary w-full" required />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Género</span></label>
+                <select name="genero" class="select select-bordered focus:select-secondary w-full" required>
+                    {% for id_gen, nombre_gen in mapa_generos %}
+                    <option value="{{ nombre_gen }}" {{ 'selected' if disco.nombre_genero == nombre_gen else '' }}>
+                        {{ nombre_gen }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Formato</span></label>
+                <select name="formato" class="select select-bordered focus:select-secondary w-full" required>
+                    <option value="CD" {{ 'selected' if disco.formato == 0 else '' }}>CD</option>
+                    <option value="vinilo" {{ 'selected' if disco.formato == 1 else '' }}>Vinilo</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Precio</span></label>
+                <label class="input input-bordered focus:input-secondary w-full flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path fill="currentColor" d="M17 12v-1h-4V6h4V4h-4V1h-2v3H7v1H6v7h1v1h4v5H6v2h5v3h2v-3h4v-1h1v-7Zm-6-1H9v-1H8V7h1V6h2Zm4 6v1h-2v-5h2v1h1v3Z"/>
+                    </svg>
+                    <input type="number" name="precio" value="{{ disco.precio }}" step="0.01" min="0" class="grow" required />
+                </label>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text font-semibold">Descripción</span></label>
+                <input type="text" name="descripcion" value="{{ disco.descripcion or '' }}" placeholder="Opcional..." class="input input-bordered focus:input-secondary w-full" />
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">Imagen actual</span></label>
+            <div class="flex items-center gap-4">
+                <img src="{{ disco.imagen }}" class="h-20 w-20 object-cover rounded-lg border border-base-300" />
+                <div class="flex-1">
+                    <input type="file" name="imagen" accept="image/*" class="file-input file-input-bordered file-input-accent w-full" />
+                    <span class="text-xs text-base-content/50 mt-1 block">Deja vacío para conservar la imagen actual</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-action flex gap-2 pt-4">
+            <button type="button" onclick="document.getElementById('editar_disco').close()" class="btn btn-ghost">Cancelar</button>
+            <button type="submit" class="btn btn-accent px-8">Guardar cambios</button>
+        </div>
+    </form>
+</div>

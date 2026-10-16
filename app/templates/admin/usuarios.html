@@ -1,0 +1,94 @@
+{% extends "base.html" %} {% block title %}Usuarios | Admin{% endblock %} {%
+block content %}
+<div class="container mx-auto px-4 py-8 lg:py-12">
+    <h1 class="text-4xl font-black uppercase tracking-tighter mb-8">
+        Gestión de Usuarios
+    </h1>
+
+    <div class="card bg-base-200 border border-base-300 shadow-xl">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <thead class="bg-base-300">
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuario</th>
+                            <th>Correo</th>
+                            <th>Tipo</th>
+                            <th>Registro</th>
+                            <th class="text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td class="font-mono">{{ u.id_usuario }}</td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar">
+                                        <div class="w-10 rounded-full">
+                                            {% if u.icono_usuario %}
+                                            <img
+                                                src="{{ u.icono_usuario }}"
+                                                alt="{{ u.nombre }}"
+                                            />
+                                            {% else %}
+                                            <div
+                                                class="bg-neutral text-neutral-content flex items-center justify-center font-bold w-full h-full"
+                                            >
+                                                {{ u.nombre[0]|upper }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <span class="font-bold"
+                                        >{{ u.nombre }}</span
+                                    >
+                                </div>
+                            </td>
+                            <td>{{ u.correo }}</td>
+                            <td>
+                                {% if u.tipo_usuario == 0 %}
+                                <span class="badge badge-primary badge-sm"
+                                    >Admin</span
+                                >
+                                {% else %}
+                                <span class="badge badge-ghost badge-sm"
+                                    >Usuario</span
+                                >
+                                {% endif %}
+                            </td>
+                            <td class="text-sm opacity-70">
+                                {{ u.fecha_registro.strftime('%d/%m/%Y') if
+                                u.fecha_registro else '-' }}
+                            </td>
+                            <td class="text-right">
+                                {% if u.id_usuario != current_user.id_usuario %}
+                                <form
+                                    action="{{ url_for('admin.eliminar_usuario', id=u.id_usuario) }}"
+                                    method="POST"
+                                    class="inline"
+                                    onsubmit="return confirm('¿Eliminar permanentemente a {{ u.nombre }}?');"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="btn btn-error btn-sm btn-outline rounded-full"
+                                    >
+                                        Eliminar
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="badge badge-sm badge-neutral"
+                                    >Tú</span
+                                >
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

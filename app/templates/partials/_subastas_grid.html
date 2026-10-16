@@ -1,0 +1,49 @@
+<!-- Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
+    {% for subasta in subastas %} {% set disco = subasta.disco %}
+    <a
+        href="{#{ url_for('detalle_subasta.detalle_subasta', id_subasta=subasta.id_subasta, slug=disco.titulo|slugify) }#}"
+        class="group"
+    >
+        <div
+            class="card bg-base-200/70 border border-base-content/10 w-full h-full shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-95 cursor-pointer"
+        >
+            <figure class="relative h-48 overflow-hidden">
+                <img
+                    src="{{ disco.imagen }}"
+                    alt="{{ disco.titulo }}"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div
+                    class="absolute top-2 left-2 badge badge-secondary badge-outline shadow-sm backdrop-blur-md bg-base-100/70"
+                >
+                    <strong>${{ "%.2f"|format(subasta.precio) }}</strong>
+                </div>
+                <div
+                    class="absolute top-2 right-2 badge {{ 'badge-accent' if disco.formato else 'badge-primary' }} shadow-sm"
+                >
+                    {{ 'Vinilo' if disco.formato else 'CD' }}
+                </div>
+            </figure>
+            <div class="card-body p-4">
+                <h2 class="card-title line-clamp-2 text-base items-start">
+                    {{ disco.titulo }}
+                </h2>
+                <p class="text-sm line-clamp-1">
+                    {{ disco.descripcion or disco.artista }}
+                </p>
+                <p class="text-xs text-base-content/50 mt-1">
+                    Precio inicial: ${{ "%.2f"|format(subasta.precio) }}
+                    <!--|                    Mínimo: ${{ "%.2f"|format(subasta.precio_minimo) }}-->
+                </p>
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <div class="col-span-full text-center py-20">
+        <p class="text-lg text-base-content/50">
+            No se encontraron subastas activas.
+        </p>
+    </div>
+    {% endfor %}
+</div>

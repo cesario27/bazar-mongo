@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Bazar Stereo | Discos {% endblock %}
+
+{% block content %}
+<div class="container mx-auto p-4 flex flex-col md:flex-row gap-10">
+    <aside class="w-full md:w-64 flex-shrink-0 md:sticky md:top-24 self-start">
+        <div class="mb-10">
+            <h1 class="text-3xl font-black tracking-tighter text-base-content">Discos</h1>
+            <div class="h-1 w-12 bg-accent mt-1 rounded-full"></div>
+        </div>
+
+        <form
+            id="filter-form"
+            hx-get="{{ url_for('discos.discos') }}"
+            hx-target="#discos-content"
+            hx-swap="innerHTML"
+            hx-trigger="change, submit"
+            class="space-y-10"
+        >
+            <!-- Filtro, formato -->
+            <section>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-base-content/50 mb-4">Formato</h3>
+                <div class="grid grid-cols-1 gap-1">
+                    <!-- CD -->
+                    <label class="group flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-all cursor-pointer">
+                        <input
+                            type="radio"
+                            name="formato"
+                            value="cd"
+                            class="radio radio-accent radio-sm border-2 formato-radio"
+                            {% if 'cd' in formatos_select %}checked{% endif %}
+                        />
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">CD</span>
+                    </label>
+
+                    <!-- Vinilo -->
+                    <label class="group flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-all cursor-pointer">
+                        <input
+                            type="radio"
+                            name="formato"
+                            value="vinilo"
+                            class="radio radio-accent radio-sm border-2 formato-radio"
+                            {% if 'vinilo' in formatos_select %}checked{% endif %}
+                        />
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">Vinilo</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- genero checkboxes -->
+            <section>
+                <h3 class="text-xs font-bold uppercase tracking-widest text-base-content/50 mb-4">Género</h3>
+                <div class="flex flex-col gap-1 max-h-64 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-base-300">
+                    {% for genero in lista_generos %}
+                    <label class="group flex items-center gap-3 p-2 rounded-lg hover:bg-base-200 transition-all cursor-pointer">
+                        <input
+                            type="checkbox"
+                            name="generos"
+                            value="{{ genero }}"
+                            class="checkbox checkbox-accent checkbox-sm border-2"
+                            {% if genero in generos_select %}checked{% endif %}
+                        />
+                        <span class="text-sm font-medium group-hover:translate-x-1 transition-transform">{{ genero }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Boton pa limpiar -->
+            <button
+                type="button"
+                class="btn btn-outline btn-sm btn-block border-base-300 normal-case font-medium hover:bg-error hover:border-error hover:text-error-content text-center"
+                onclick="limpiarFiltros(this)"
+            >
+                Limpiar filtros
+            </button>
+        </form>
+    </aside>
+
+    <!-- Contenido dinámico -->
+    <div id="discos-content" class="flex-1">
+        {% include "partials/_discos_grid.html" %}
+    </div>
+</div>
+
+<script src="https://unpkg.com/htmx.org@2.0.4"></script>
+<script>
+    function limpiarFiltros(btn) {
+        const form = btn.closest('form');
+
+        // Desmarcar radios de formato
+        form.querySelectorAll('input[type="radio"][name="formato"]').forEach(radio => {
+            radio.checked = false;
+        });
+
+        // Desmarcar todos los checkboxes de género
+        form.querySelectorAll('input[type="checkbox"]').forEach(check => {
+            check.checked = false;
+        });
+
+        htmx.trigger(form, 'submit');
+    }
+</script>
+{% endblock %}

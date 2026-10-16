@@ -1,0 +1,124 @@
+{% extends "base.html" %} {% block title %}Panel Admin | Bazar Stereo{% endblock
+%} {% block content %}
+<div class="container mx-auto px-4 py-8 lg:py-12">
+    <h1 class="text-4xl font-black uppercase tracking-tighter mb-8">
+        Panel de Administración
+    </h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card bg-primary text-primary-content shadow-xl">
+            <div class="card-body">
+                <h2 class="text-4xl font-black">{{ total_usuarios }}</h2>
+                <p class="text-lg font-medium opacity-90">
+                    Usuarios registrados
+                </p>
+            </div>
+        </div>
+        <div class="card bg-secondary text-secondary-content shadow-xl">
+            <div class="card-body">
+                <h2 class="text-4xl font-black">{{ total_ventas }}</h2>
+                <p class="text-lg font-medium opacity-90">Total de ventas</p>
+            </div>
+        </div>
+        <div class="card bg-accent text-accent-content shadow-xl">
+            <div class="card-body">
+                <h2 class="text-4xl font-black">
+                    ${{ "%.2f"|format(ingresos_totales) }}
+                </h2>
+                <p class="text-lg font-medium opacity-90">Ingresos totales</p>
+            </div>
+        </div>
+        <div
+            class="card bg-neutral text-neutral-content shadow-xl border border-base-300"
+        >
+            <div class="card-body">
+                <h2 class="text-4xl font-black">
+                    ${{ "%.2f"|format(comisiones_totales) }}
+                </h2>
+                <p class="text-lg font-medium opacity-90">Comisiones totales</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="card bg-base-200 border border-base-300">
+            <div class="card-body">
+                <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="1em"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M3 3v18h18" />
+                        <path d="M18 17V9" />
+                        <path d="M13 17V5" />
+                        <path d="M8 17v-3" />
+                    </svg>
+                    Ventas por mes
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>Cantidad</th>
+                                <th class="text-right">Ventas</th>
+                                <th class="text-right">Comisión</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in ventas_mes %}
+                            <tr>
+                                <td>{{ v.mes }}/{{ v.anio }}</td>
+                                <td>{{ v.cantidad }}</td>
+                                <td class="text-right font-bold">
+                                    ${{ "%.2f"|format(v.total) }}
+                                </td>
+                                <td class="text-right text-success font-bold">
+                                    ${{ "%.2f"|format(v.comision) }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center opacity-50">
+                                    Sin datos
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-200 border border-base-300">
+            <div class="card-body">
+                <div class="flex flex-col gap-3">
+                    <a
+                        href="{{ url_for('admin.usuarios') }}"
+                        class="btn btn-primary btn-lg font-bold"
+                    >
+                        Gestionar Usuarios
+                    </a>
+                    <a
+                        href="{{ url_for('admin.discos') }}"
+                        class="btn btn-accent btn-lg font-bold"
+                    >
+                        Gestionar Discos
+                    </a>
+                    <a
+                        href="{{ url_for('admin.ventas') }}"
+                        class="btn btn-secondary btn-lg font-bold"
+                    >
+                        Estadísticas de Ventas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,580 @@
+{% extends "base.html" %} {% block title %}{{ disco.titulo }} — Subasta | Bazar
+Stereo{% endblock %} {% block content %}
+
+<div class="container mx-auto px-4 py-8 lg:py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <!-- Imagen -->
+        <div class="space-y-6">
+            <div
+                class="relative group aspect-square bg-base-200 rounded-[2rem] overflow-hidden shadow-xl border border-base-300 hover:shadow-2xl transition-shadow duration-500"
+            >
+                <img
+                    src="{{ disco.imagen }}"
+                    alt="{{ disco.titulo }}"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                {% if subasta.estado == 1 %}
+                <div
+                    class="absolute top-4 left-4 badge badge-lg badge-accent gap-1"
+                >
+                    <span
+                        class="w-2 h-2 rounded-full bg-white animate-pulse"
+                    ></span>
+                    En subasta
+                </div>
+                {% elif subasta_no_vendida %}
+                <div class="absolute top-4 left-4 badge badge-lg badge-warning">
+                    No vendido
+                </div>
+                {% else %}
+                <div class="absolute top-4 left-4 badge badge-lg badge-neutral">
+                    Finalizada
+                </div>
+                {% endif %}
+                <div
+                    class="absolute bottom-4 right-4 badge badge-lg badge-secondary"
+                >
+                    {{ 'Vinilo' if disco.formato else 'CD' }}
+                </div>
+            </div>
+
+            <!-- Info vendedor -->
+            <div class="card bg-base-200">
+                <div class="card-body flex-row items-center gap-4">
+                    <div class="avatar">
+                        <div
+                            class="w-12 rounded-full ring-2 ring-primary ring-offset-2"
+                        >
+                            {% if vendedor and vendedor.icono_usuario %}
+                            <img
+                                src="{{ vendedor.icono_usuario }}"
+                                alt="{{ vendedor.nombre }}"
+                                class="w-full h-full object-cover"
+                            />
+                            {% else %}
+                            <div
+                                class="bg-primary text-primary-content flex items-center justify-center font-bold w-full h-full text-lg"
+                            >
+                                {{ vendedor.nombre[0]|upper if vendedor else '?'
+                                }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold">
+                                {{ vendedor.nombre if vendedor else 'Vendedor'
+                                }}
+                            </p>
+                            <div class="rating rating-xs gap-0.5">
+                                {% for i in range(1, 6) %}
+                                <div
+                                    class="mask mask-star-2 {{ 'bg-orange-400' if i <= calificacion else 'bg-base-content/15' }} w-3.5 h-3.5"
+                                ></div>
+                                {% endfor %}
+                            </div>
+                            <span
+                                class="text-xs text-base-content/50 font-medium"
+                                >{{ calificacion }}</span
+                            >
+                        </div>
+                        <p class="text-xs text-base-content/50">Vendedor</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles -->
+        <div class="flex flex-col">
+            <div class="mb-6">
+                <h1
+                    class="text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-none"
+                >
+                    {{ disco.titulo }}
+                </h1>
+                <h3
+                    class="text-xl font-medium text-secondary mt-1 tracking-tight"
+                >
+                    {{ disco.artista }}
+                </h3>
+                <div class="divider my-2"></div>
+                <p
+                    class="text-base text-base-content/80 leading-relaxed text-justify"
+                >
+                    {{ disco.descripcion or 'Sin descripción disponible.' }}
+                </p>
+            </div>
+
+            <!-- Precio -->
+            <div class="flex items-baseline gap-2 mt-6 mb-4">
+                <p class="text-base text-base-content/80">Precio actual</p>
+                <div class="badge badge-xl badge-accent font-bold text-2xl">
+                    ${{ "%.2f"|format(precio_actual) }}
+                </div>
+                <span class="text-sm opacity-50 uppercase font-bold">MXN</span>
+            </div>
+
+            {% if subasta.estado == 1 %}
+            <div class="flex justify-center items-center w-full py-4">
+                <div class="flex gap-5">
+                    <div class="text-center">
+                        <span class="countdown font-mono text-4xl" id="cd-dias"
+                            ><span style="--value: 00">00</span></span
+                        >
+                        <div class="text-xs uppercase font-bold opacity-50">
+                            días
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="countdown font-mono text-4xl" id="cd-horas"
+                            ><span style="--value: 00">00</span></span
+                        >
+                        <div class="text-xs uppercase font-bold opacity-50">
+                            horas
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="countdown fonto-mono text-4xl" id="cd-min"
+                            ><span style="--value: 00">00</span></span
+                        >
+                        <div class="text-xs uppercase font-bold opacity-50">
+                            min
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <span class="countdown fonto-mono text-4xl" id="cd-seg"
+                            ><span style="--value: 00">00</span></span
+                        >
+                        <div class="text-xs uppercase font-bold opacity-50">
+                            seg
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% if subasta.estado == 1 %} {% if current_user.is_authenticated
+                and disco.id_usuario != current_user.id_usuario %}
+                <button
+                    onclick="modal_ofertar.showModal()"
+                    class="btn btn-primary btn-lg rounded-full font-black uppercase tracking-widest text-lg shadow-lg hover:shadow-primary/20 transition-shadow w-full"
+                >
+                    ¡Ofertar!
+                </button>
+                {% elif current_user.is_authenticated %}
+                <div class="alert alert-info">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        class="stroke-current shrink-0 w-6 h-6"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <span>No puedes pujar en tu propia subasta</span>
+                </div>
+                {% else %}
+                <label
+                    for="login-modal"
+                    class="btn btn-primary btn-lg rounded-full font-black uppercase tracking-widest text-lg w-full cursor-pointer"
+                >
+                    Inicia sesión para pujar
+                </label>
+                {% endif %} {% elif es_ganador %}
+                <div class="alert alert-success">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-current shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                    </svg>
+                    <span
+                        >¡Ganaste esta subasta por ${{
+                        "%.2f"|format(precio_actual) }}!</span
+                    >
+                </div>
+                {% elif subasta_no_vendida %}
+                <div class="alert alert-warning">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="stroke-current shrink-0 h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                    </svg>
+                    <span
+                        >Subasta finalizada sin alcanzar el precio minimo.</span
+                    >
+                </div>
+                {% else %}
+                <div class="alert alert-neutral">
+                    <span
+                        >Subasta finalizada. Precio final: ${{
+                        "%.2f"|format(precio_actual) }}</span
+                    >
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Metadata -->
+            <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                <div>
+                    <span
+                        class="block opacity-50 uppercase font-bold text-[10px] tracking-wider mb-1"
+                        >Formato</span
+                    >
+                    <span class="badge badge-ghost badge-lg font-bold uppercase"
+                        >{{ 'Vinilo' if disco.formato else 'CD' }}</span
+                    >
+                </div>
+                <div>
+                    <span
+                        class="block opacity-50 uppercase font-bold text-[10px] tracking-wider mb-1"
+                        >Género</span
+                    >
+                    <span class="badge badge-ghost badge-lg font-bold uppercase"
+                        >{{ disco.nombre_genero if disco.nombre_genero else 'Sin
+                        género' }}</span
+                    >
+                </div>
+            </div>
+
+            <!-- Historial de pujas -->
+            <div class="card bg-base-200">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        >
+                            <path d="M3 3v18h18" />
+                            <path d="M18 17V9" />
+                            <path d="M13 17V5" />
+                            <path d="M8 17v-3" />
+                        </svg>
+                        Historial de pujas
+                    </h3>
+                    {% if pujas %}
+                    <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                        <table class="table table-zebra table-sm w-full">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Puja</th>
+                                    <th>Precio</th>
+                                    <th>Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for puja, usuario in pujas %}
+                                <tr
+                                    class="{{ 'bg-primary/10 font-bold' if loop.first else '' }}"
+                                >
+                                    <td class="flex items-center gap-2">
+                                        <div class="avatar">
+                                            <div class="w-6 rounded-full">
+                                                {% if usuario.icono_usuario %}
+                                                <img
+                                                    src="{{ usuario.icono_usuario }}"
+                                                    alt="{{ usuario.nombre }}"
+                                                />
+                                                {% else %}
+                                                <div
+                                                    class="bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs w-full h-full"
+                                                >
+                                                    {{ usuario.nombre[0]|upper
+                                                    }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        {{ usuario.nombre }} {% if loop.first
+                                        %}<span
+                                            class="badge badge-xs badge-primary"
+                                            >Líder</span
+                                        >{% endif %}
+                                    </td>
+                                    <td class="font-mono text-success">
+                                        +{{ puja.porcentaje }}%
+                                    </td>
+                                    <td class="font-semibold">
+                                        ${{ "%.2f"|format(precio_base * (1 +
+                                        puja.porcentaje / 100)) }}
+                                    </td>
+                                    <td class="text-xs text-base-content/50">
+                                        {{ puja.fecha.strftime('%H:%M') if
+                                        puja.fecha else '-' }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-base-content/50 py-4 text-sm">
+                        Aún no hay pujas. ¡Sé el primero!
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Ofertar -->
+{% if subasta.estado == 1 and current_user.is_authenticated and disco.id_usuario
+!= current_user.id_usuario %}
+<dialog id="modal_ofertar" class="modal modal-bottom sm:modal-middle">
+    <div
+        class="modal-box border border-base-300 shadow-2xl w-full md:max-w-2xl md:p-10"
+    >
+        <button
+            type="button"
+            onclick="modal_ofertar.close()"
+            class="btn btn-sm btn-circle btn-ghost absolute right-4 top-4"
+        >
+            ✕
+        </button>
+
+        <h3 class="text-3xl font-black uppercase tracking-tight mb-2">
+            ¡Haz una oferta!
+        </h3>
+        <p class="text-sm opacity-70 mb-6">
+            Precio actual:
+            <strong>${{ "%.2f"|format(precio_actual) }}</strong> {% if
+            puja_maxima %} | Puja más alta:
+            <strong>+{{ puja_maxima.porcentaje }}%</strong>{% endif %} |
+            Incremento mínimo: <strong>+{{ min_pct }}%</strong>
+        </p>
+
+        <input type="hidden" name="porcentaje" id="input_porcentaje" value="" />
+
+        <div id="botones-puja" class="my-6">
+            <p class="text-sm text-base-content/60 mb-4">
+                Selecciona el incremento sobre la puja actual:
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button
+                    type="button"
+                    class="btn btn-outline btn-secondary font-bold text-lg py-3"
+                    onmouseenter="mostrarPrecio({{ ultima_puja_pct + 5 }})"
+                    onclick="seleccionarPuja({{ ultima_puja_pct + 5 }})"
+                >
+                    + 5%
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline btn-secondary font-bold text-lg py-3"
+                    onmouseenter="mostrarPrecio({{ ultima_puja_pct + 10 }})"
+                    onclick="seleccionarPuja({{ ultima_puja_pct + 10 }})"
+                >
+                    + 10%
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline btn-secondary font-bold text-lg py-3"
+                    onmouseenter="mostrarPrecio({{ ultima_puja_pct + 15 }})"
+                    onclick="seleccionarPuja({{ ultima_puja_pct + 15 }})"
+                >
+                    + 15%
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline btn-secondary font-bold text-lg py-3"
+                    onmouseenter="mostrarPrecio({{ ultima_puja_pct + 20 }})"
+                    onclick="seleccionarPuja({{ ultima_puja_pct + 20 }})"
+                >
+                    + 20%
+                </button>
+            </div>
+            <div class="label mt-2">
+                <span class="label-text-alt text-info"
+                    >Precio resultante: $<span id="preview_precio"
+                        >0.00</span
+                    ></span
+                >
+            </div>
+        </div>
+
+        <!-- Zona de confirmación -->
+        <div id="zona-confirmacion" class="hidden">
+            <div
+                class="flex items-center justify-between bg-base-200 rounded-xl px-6 py-4 border border-base-300"
+            >
+                <div>
+                    <p class="font-bold text-lg">¿Confirmar puja?</p>
+                    <p class="text-sm text-base-content/60">
+                        Has seleccionado
+                        <strong id="texto-confirmacion">+0%</strong> →
+                        <strong id="precio-confirmacion">$0.00</strong>
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <button
+                        type="button"
+                        onclick="cancelarPuja()"
+                        class="btn btn-ghost btn-sm"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        type="button"
+                        id="btn-confirmar"
+                        class="btn btn-primary btn-sm font-bold px-6"
+                    >
+                        ¡Sí, ofertar!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop"><button>close</button></form>
+</dialog>
+{% endif %}
+
+<script>
+    const finStr = "{{ subasta.fecha_fin.isoformat() if subasta.fecha_fin and subasta.estado == 1 else '' }}";
+    if (finStr) {
+        const fin = new Date(finStr);
+        function updateCountdown() {
+            const ahora = new Date();
+            const diff = fin - ahora;
+            if (diff <= 0) {
+                document.querySelectorAll('.countdown span').forEach(el => el.style.setProperty('--value', '00'));
+                setTimeout(() => location.reload(), 2000);
+                return;
+            }
+            const dias = Math.floor(diff / 86400000);
+            const horas = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const segs = Math.floor((diff % 60000) / 1000);
+            document.getElementById('cd-dias').querySelector('span').style.setProperty('--value', dias.toString().padStart(2, '0'));
+            document.getElementById('cd-horas').querySelector('span').style.setProperty('--value', horas.toString().padStart(2, '0'));
+            document.getElementById('cd-min').querySelector('span').style.setProperty('--value', mins.toString().padStart(2, '0'));
+            document.getElementById('cd-seg').querySelector('span').style.setProperty('--value', segs.toString().padStart(2, '0'));
+        }
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    }
+
+    const base = {{ precio_base }};
+    const previewPrecio = document.getElementById("preview_precio");
+    const btnConfirmar = document.getElementById("btn-confirmar");
+    const textoConfirmacion = document.getElementById("texto-confirmacion");
+    const precioConfirmacion = document.getElementById("precio-confirmacion");
+    const botonesPuja = document.getElementById("botones-puja");
+    const zonaConfirmacion = document.getElementById("zona-confirmacion");
+    const urlPujar = "{{ url_for('detalle_subasta.pujar', id_subasta=subasta.id_subasta, slug=slug) }}";
+    let pctSeleccionado = 0;
+
+    function mostrarPrecio(pct) {
+        if (previewPrecio) {
+            previewPrecio.textContent = (base * (1 + pct / 100)).toFixed(2);
+        }
+    }
+
+    function seleccionarPuja(porcentaje) {
+        pctSeleccionado = porcentaje;
+        mostrarPrecio(porcentaje);
+
+        const botones = botonesPuja.querySelectorAll("button");
+        botones.forEach(b => {
+            b.classList.remove("btn-secondary");
+            b.classList.add("btn-outline");
+        });
+        event.target.classList.remove("btn-outline");
+        event.target.classList.add("btn-secondary");
+
+        botonesPuja.classList.add("hidden");
+        zonaConfirmacion.classList.remove("hidden");
+
+        textoConfirmacion.textContent = "+" + porcentaje + "%";
+        precioConfirmacion.textContent = "$" + (base * (1 + porcentaje / 100)).toFixed(2);
+
+        document.getElementById("input_porcentaje").value = porcentaje;
+    }
+
+    function cancelarPuja() {
+        zonaConfirmacion.classList.add("hidden");
+        botonesPuja.classList.remove("hidden");
+
+        const botones = botonesPuja.querySelectorAll("button");
+        botones.forEach(b => {
+            b.classList.remove("btn-secondary");
+            b.classList.add("btn-outline");
+        });
+        pctSeleccionado = 0;
+        previewPrecio.textContent = "0.00";
+    }
+
+    btnConfirmar.addEventListener("click", function() {
+        if (pctSeleccionado <= 0) return;
+
+        btnConfirmar.disabled = true;
+        btnConfirmar.classList.add("loading");
+        btnConfirmar.textContent = "Procesando...";
+
+        var formData = new FormData();
+        formData.append("porcentaje", pctSeleccionado);
+
+        fetch(urlPujar, {
+            method: "POST",
+            body: formData,
+        })
+        .then(function(response) {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                btnConfirmar.disabled = false;
+                btnConfirmar.textContent = "¡Sí, ofertar!";
+                alert("Error al procesar la puja");
+            }
+        })
+        .catch(function(err) {
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = "¡Sí, ofertar!";
+            alert("Error de conexión: " + err.message);
+        });
+    });
+</script>
+
+{% if es_ganador %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modal = document.getElementById("success-modal");
+        const msgEl = document.getElementById("success-modal-message");
+        if (modal && msgEl) {
+            msgEl.textContent =
+                "¡Ganaste esta subasta por ${{ '%.2f'|format(precio_actual) }}!";
+            modal.showModal();
+        }
+    });
+</script>
+{% endif %} {% endblock %}

@@ -1,0 +1,70 @@
+{% extends "base.html" %} {% block title %} Página no encontrada {% endblock %}
+{% block content %}
+<div class="hero min-h-screen">
+    <div class="hero-content flex-col lg:flex-row gap-8 lg:gap-16">
+        <div class="relative group">
+            <div
+                class="absolute -inset-1 bg-gradient-to-r from-error/50 to-warning/50 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"
+            ></div>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.2"
+                stroke="currentColor"
+                class="relative size-48 lg:size-80 text-error animate-pulse-slow"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"
+                />
+            </svg>
+        </div>
+
+        <div class="max-w-md text-center lg:text-left">
+            <span
+                class="text-error font-mono font-bold tracking-widest uppercase"
+                >Error 404</span
+            >
+            <h1 class="text-6xl font-black mt-2 mb-4">
+                ¡Uy! Te has <span class="text-error italic">perdido.</span>
+            </h1>
+            <p class="text-lg opacity-80 mb-8">
+                La página que buscas parece haber tomado un descanso eterno o
+                simplemente nunca existió.
+            </p>
+
+            <div class="flex flex-col w-full gap-3 mt-8 px-4 lg:px-0">
+                <a
+                    href="{{ url_for('main.inicio') }}"
+                    class="btn btn-error btn-md sm:btn-lg w-full shadow-md transition-transform active:scale-95"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="size-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+                        />
+                    </svg>
+                    Ir al inicio
+                </a>
+
+                <button
+                    onclick="history.back()"
+                    class="btn btn-ghost btn-md sm:btn-lg w-full border-base-300"
+                >
+                    Regresar atrás
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

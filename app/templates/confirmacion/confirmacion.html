@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <style>
+            body {
+                font-family: "Segoe UI", Arial, sans-serif;
+                background: #f5f5f5;
+                margin: 0;
+                padding: 20px;
+            }
+            .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 16px;
+                overflow: hidden;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            }
+            .header {
+                background: #8c102b;
+                padding: 30px;
+                text-align: center;
+            }
+            .header h1 {
+                color: white;
+                margin: 0;
+                font-size: 24px;
+            }
+            .body {
+                padding: 30px;
+            }
+            .disco-box {
+                background: #f0fdf4;
+                border: 2px solid #10b981;
+                border-radius: 12px;
+                padding: 20px;
+                margin: 20px 0;
+                text-align: center;
+            }
+            .precio {
+                font-size: 32px;
+                font-weight: bold;
+                color: #065f46;
+                margin: 10px 0;
+            }
+            .footer {
+                background: #f9fafb;
+                padding: 20px;
+                text-align: center;
+                font-size: 12px;
+                color: #6b7280;
+            }
+            .btn {
+                display: inline-block;
+                background: #10b981;
+                color: white;
+                padding: 12px 30px;
+                border-radius: 9999px;
+                text-decoration: none;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Bazar Stereo</h1>
+            </div>
+            <div class="body">
+                <h2>¡Felicidades, {{ nombre }}!</h2>
+
+                {% if tipo == "compra" %}
+                <p>Tu compra ha sido realizada exitosamente.</p>
+                {% else %}
+                <p>¡Has ganado la subasta!</p>
+                {% endif %}
+
+                <div class="disco-box">
+                    <p style="margin: 0; color: #6b7280; font-size: 14px">
+                        Disco:
+                    </p>
+                    <h3 style="margin: 8px 0; color: #111827">{{ disco }}</h3>
+                    <div class="precio">${{ "%.2f"|format(precio) }} MXN</div>
+                </div>
+
+                <p style="font-size: 12px; color: #6b7280; margin-top: 20px">
+                    Revisa tu cuenta para ver mas información.
+                </p>
+            </div>
+            <div class="footer">
+                <p>© 2026 Bazar Stereo — Todos los derechos reservados</p>
+                <p style="margin-top: 8px">
+                    Este es un correo automático, por favor no respondas.
+                </p>
+            </div>
+        </div>
+    </body>
+</html>

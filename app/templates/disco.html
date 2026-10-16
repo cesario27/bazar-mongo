@@ -1,0 +1,157 @@
+{% extends "base.html" %} {% block title %}Bazar Stereo | Disco {% endblock %}
+{% block content %}
+
+<div class="container mx-auto px-4 py-8 lg:py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+        <!-- Imagen del producto -->
+        <div class="space-y-6">
+            <div
+                class="relative group aspect-square bg-base-200 rounded-[2rem] overflow-hidden shadow-xl border border-base-300 hover:shadow-2xl transition-shadow duration-500"
+            >
+                <img
+                    src="{{ detalle_disco.imagen }}"
+                    alt="{{ detalle_disco.titulo }}"
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div
+                    class="absolute bottom-4 right-4 badge badge-lg badge-secondary"
+                >
+                    {{ 'Vinilo' if detalle_disco.formato else 'CD' }}
+                </div>
+            </div>
+
+            <!-- Info vendedor -->
+            <div class="card bg-base-200">
+                <div class="card-body flex-row items-center gap-4">
+                    <div class="avatar">
+                        <div
+                            class="w-12 rounded-full ring-2 ring-primary ring-offset-2"
+                        >
+                            {% if vendedor and vendedor.icono_usuario %}
+                            <img
+                                src="{{ vendedor.icono_usuario }}"
+                                alt="{{ vendedor.nombre }}"
+                            />
+                            {% else %}
+                            <div
+                                class="bg-primary text-primary-content flex items-center justify-center font-bold w-full h-full text-lg"
+                            >
+                                {{ vendedor.nombre[0]|upper if vendedor else '?'
+                                }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <p class="font-bold">
+                                {{ vendedor.nombre if vendedor else 'Vendedor'
+                                }}
+                            </p>
+                            <div class="rating rating-xs gap-0.5">
+                                {% for i in range(1, 6) %}
+                                <div
+                                    class="mask mask-star-2 {{ 'bg-orange-400' if i <= calificacion else 'bg-base-content/15' }} w-3.5 h-3.5"
+                                ></div>
+                                {% endfor %}
+                            </div>
+                            <span
+                                class="text-xs text-base-content/50 font-medium"
+                                >{{ calificacion }}</span
+                            >
+                        </div>
+                        <p class="text-xs text-base-content/50">Vendedor</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detalles del producto -->
+        <div class="flex flex-col">
+            <!-- Título -->
+            <div class="mb-6">
+                <h1
+                    class="text-4xl lg:text-5xl font-black uppercase tracking-tighter leading-none"
+                >
+                    {{ detalle_disco.titulo }}
+                </h1>
+                <h3
+                    class="text-xl font-medium text-secondary mt-1 tracking-tight"
+                >
+                    {{ detalle_disco.artista }}
+                </h3>
+                <div class="divider my-2"></div>
+                <p
+                    class="text-base text-base-content/80 leading-relaxed text-justify"
+                >
+                    {{ detalle_disco.descripcion }}
+                </p>
+            </div>
+
+            <!-- Precio -->
+            <div class="flex items-baseline gap-2 mt-6 mb-4">
+                <span class="text-4xl font-bold text-secondary tracking-tight"
+                    >${{ "%.2f"|format(detalle_disco.precio) }}</span
+                >
+                <span class="text-sm opacity-50 uppercase font-bold">MXN</span>
+            </div>
+
+            <!-- Botones -->
+            <div class="space-y-4">
+                <div class="grid grid-cols-1 gap-3">
+                    <form
+                        method="POST"
+                        action="{{ url_for('carrito.comprar_ahora', id_disco=detalle_disco.id_disco) }}"
+                    >
+                        <button
+                            type="submit"
+                            class="btn btn-primary btn-lg rounded-full font-black uppercase tracking-widest text-lg shadow-lg hover:shadow-primary/20 transition-shadow w-full"
+                        >
+                            ¡Cómpralo ahora!
+                        </button>
+                    </form>
+                    <form
+                        hx-post="{{ url_for('carrito.agregar_al_carrito', id_disco=detalle_disco.id_disco) }}"
+                        hx-target="#htmx-flash"
+                        hx-swap="innerHTML"
+                    >
+                        <button
+                            type="submit"
+                            class="btn btn-outline btn-lg rounded-full font-bold border-2 hover:bg-base-200 hover:border-base-300 transition-colors w-full"
+                        >
+                            Agregar al carrito
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Separador -->
+            <div class="divider my-8"></div>
+            <!-- Metadata (Formato / Género) -->
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span
+                        class="block opacity-50 uppercase font-bold text-[10px] tracking-wider mb-1"
+                        >Formato</span
+                    >
+                    <span
+                        class="badge badge-ghost badge-lg font-bold uppercase"
+                    >
+                        {{ detalle_disco.formato_nombre }}</span
+                    >
+                </div>
+                <div>
+                    <span
+                        class="block opacity-50 uppercase font-bold text-[10px] tracking-wider mb-1"
+                        >Género</span
+                    >
+                    <span class="badge badge-ghost badge-lg font-bold uppercase"
+                        >{{ detalle_disco.nombre_genero }}</span
+                    >
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,606 @@
+{% extends "base.html" %} {% block title %}Bazar Stereo | Inicio {% endblock %}
+{% block content %}
+
+<section class="relative overflow-hidden">
+    <div
+        class="absolute inset-0 bg-gradient-to-br from-base-100 via-base-100 to-primary/5 pointer-events-none"
+    ></div>
+    <div
+        class="absolute top-20 right-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none"
+    ></div>
+    <div
+        class="absolute bottom-10 left-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl pointer-events-none"
+    ></div>
+
+    <div class="hero py-20 lg:py-28 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div
+            class="hero-content flex-col lg:flex-row-reverse gap-8 lg:gap-16 max-w-6xl"
+        >
+            <!-- Logo + animación  -->
+            <div class="lg:w-1/2 flex justify-center">
+                <div class="relative group">
+                    <img
+                        src="static/img/logo_bazar_stereo.svg"
+                        class="max-w-xs sm:max-w-sm lg:max-w-md w-full drop-shadow-2xl animate-float"
+                        alt="Bazar Stereo"
+                    />
+                    <!-- Glow -->
+                    <div
+                        class="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-75 -z-10 group-hover:scale-90 transition-transform duration-700"
+                    ></div>
+                </div>
+            </div>
+
+            <div class="lg:w-1/2 text-center lg:text-left">
+                <h1
+                    class="mb-4 text-5xl sm:text-6xl lg:text-7xl font-black uppercase leading-[0.9] tracking-tighter"
+                >
+                    Bazar
+                    <span
+                        class="text-primary inline-block hover:scale-105 transition-transform duration-300"
+                        >Stereo</span
+                    >
+                </h1>
+
+                <p
+                    class="mb-8 text-lg lg:text-xl font-light leading-relaxed text-base-content/70 max-w-lg mx-auto lg:mx-0"
+                >
+                    La plataforma definitiva para el
+                    <strong class="text-primary font-bold"
+                        >coleccionismo de música</strong
+                    >
+                    en formato físico.
+                </p>
+
+                <div
+                    class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+                >
+                    <a
+                        href="{{ url_for('discos.discos') }}"
+                        class="btn btn-accent btn-lg px-8 lg:px-12 rounded-full font-black uppercase tracking-widest text-sm shadow-lg hover:shadow-accent/30 hover:-translate-y-1 transition-all duration-300 group"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 group-hover:rotate-12 transition-transform"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                            />
+                        </svg>
+                        Catálogo
+                    </a>
+                    <a
+                        href="{{ url_for('subastas.subastas') }}"
+                        class="btn btn-primary btn-lg px-8 lg:px-12 rounded-full font-black uppercase tracking-widest text-sm shadow-lg hover:shadow-primary/30 hover:-translate-y-1 transition-all duration-300 group"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-5 w-5 group-hover:animate-bounce"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                            />
+                        </svg>
+                        Subastas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+</style>
+<!-- Pasos -->
+<!-- ─── Cómo funciona  ─── -->
+<section class="py-12 px-4">
+    <div class="container mx-auto max-w-5xl">
+        <h2
+            class="text-3xl font-black uppercase tracking-tighter text-center mb-10"
+        >
+            ¿Cómo funciona?
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Paso 1 -->
+            <div
+                class="card bg-base-200 border border-base-300 shadow-lg hover:shadow-xl transition-shadow"
+            >
+                <div class="card-body items-center text-center p-6">
+                    <div
+                        class="w-16 h-16 rounded-full bg-primary text-primary-content flex items-center justify-center text-2xl font-black mb-4 shadow-lg"
+                    >
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold uppercase tracking-tight mb-2">
+                        Regístrate
+                    </h3>
+                    <p class="text-sm opacity-70 leading-relaxed">
+                        Crea tu cuenta gratis en menos de un minuto. Solo
+                        necesitas un correo y contraseña para empezar.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Paso 2 -->
+            <div
+                class="card bg-base-200 border border-base-300 shadow-lg hover:shadow-xl transition-shadow"
+            >
+                <div class="card-body items-center text-center p-6">
+                    <div
+                        class="w-16 h-16 rounded-full bg-secondary text-secondary-content flex items-center justify-center text-2xl font-black mb-4 shadow-lg"
+                    >
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold uppercase tracking-tight mb-2">
+                        Compra o Vende
+                    </h3>
+                    <p class="text-sm opacity-70 leading-relaxed">
+                        Explora el catálogo, participa en subastas o publica tus
+                        propios discos para vender.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Paso 3 -->
+            <div
+                class="card bg-base-200 border border-base-300 shadow-lg hover:shadow-xl transition-shadow"
+            >
+                <div class="card-body items-center text-center p-6">
+                    <div
+                        class="w-16 h-16 rounded-full bg-accent text-accent-content flex items-center justify-center text-2xl font-black mb-4 shadow-lg"
+                    >
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold uppercase tracking-tight mb-2">
+                        Recibe tu música
+                    </h3>
+                    <p class="text-sm opacity-70 leading-relaxed">
+                        Recibe tu vinilo o CD y disfruta de tu colección.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ─── Comisiones ─── -->
+<section class="py-12 px-4 bg-base-200/50">
+    <div class="container mx-auto max-w-4xl">
+        <h2
+            class="text-3xl font-black uppercase tracking-tighter text-center mb-10"
+        >
+            Tarifas y Comisiones
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Venta directa -->
+            <div class="card bg-base-100 border border-base-300 shadow-xl">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6 text-success"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold uppercase">
+                                Venta Directa
+                            </h3>
+                            <p class="text-xs opacity-60">
+                                Compra inmediata del catálogo
+                            </p>
+                        </div>
+                    </div>
+                    <div class="divider my-2"></div>
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-sm opacity-70"
+                            >Comisión por venta</span
+                        >
+                        <span class="text-3xl font-black text-success">6%</span>
+                    </div>
+                    <p class="text-xs opacity-50 mt-2">
+                        Sobre el total de la venta
+                    </p>
+                </div>
+            </div>
+
+            <!-- Subasta -->
+            <div class="card bg-base-100 border border-base-300 shadow-xl">
+                <div class="card-body p-6">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div
+                            class="w-12 h-12 rounded-full bg-warning/20 flex items-center justify-center"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-6 w-6 text-warning"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold uppercase">Subasta</h3>
+                            <p class="text-xs opacity-60">
+                                Puja en tiempo real
+                            </p>
+                        </div>
+                    </div>
+                    <div class="divider my-2"></div>
+                    <div class="space-y-3">
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-sm opacity-70"
+                                >Hasta $20,000</span
+                            >
+                            <span class="text-2xl font-black text-warning"
+                                >11%</span
+                            >
+                        </div>
+                        <div class="flex items-baseline justify-between">
+                            <span class="text-sm opacity-70"
+                                >Más de $20,000</span
+                            >
+                            <span class="text-2xl font-black text-error"
+                                >16%</span
+                            >
+                        </div>
+                    </div>
+                    <p class="text-xs opacity-50 mt-2">
+                        Sobre el precio final de la subasta
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-sm opacity-60">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-4 w-4 inline mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                </svg>
+                Las comisiones se aplican automáticamente al finalizar cada
+                transacción.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section
+    id="reveal-section"
+    class="mb-10 opacity-0 translate-y-10 transition-all duration-1000 ease-out"
+>
+    <div
+        class="hero bg-secondary rounded-box overflow-hidden shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.1)]"
+    >
+        <div
+            class="hero-content flex-col lg:flex-row p-8 lg:py-32 lg:px-16 gap-16"
+        >
+            <div class="text-center lg:text-left text-info-content max-w-md">
+                <h1
+                    class="text-5xl font-black uppercase tracking-tighter leading-none mb-4 text-white"
+                >
+                    Únete a la
+                    <span class="opacity-80 text-white">Comunidad</span>
+                </h1>
+                <p class="text-lg font-medium opacity-90 mb-6 text-white">
+                    Haz crecer tu biblioteca musical o convierte tus tesoros en
+                    efectivo. <strong>Regístrate</strong> para comprar y vender
+                    tu colección.
+                </p>
+            </div>
+
+            <div
+                class="card bg-base-100 w-full max-w-sm shrink-0 shadow-xl border border-white/20"
+            >
+                <div class="card-body p-8 text-center">
+                    <span class="text-2xl font-bold mb-2">
+                        ¿Listo para
+                        <span class="text-rotate">
+                            <span>
+                                <span>coleccionar?</span>
+                                <span>vender?</span>
+                                <span>subastar?</span>
+                            </span>
+                        </span>
+                    </span>
+
+                    <p class="text-sm opacity-60 mb-6">
+                        Crea tu cuenta en menos de un minuto.
+                    </p>
+
+                    <div class="form-control gap-3">
+                        <label
+                            for="signup-modal"
+                            class="btn btn-primary btn-block rounded-full font-bold"
+                            >Crear una cuenta</label
+                        >
+                        <div class="divider text-xs opacity-40">
+                            O SI YA TIENES CUENTA
+                        </div>
+                        <label
+                            for="login-modal"
+                            class="btn btn-secondary btn-block rounded-full font-bold"
+                            >Iniciar Sesión</label
+                        >
+                    </div>
+
+                    <p
+                        class="text-[10px] mt-6 opacity-50 uppercase tracking-widest font-bold"
+                    >
+                        Bazar Stereo © 2026
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.remove(
+                            "opacity-0",
+                            "translate-y-10",
+                        );
+                        entry.target.classList.add(
+                            "opacity-100",
+                            "translate-y-0",
+                        );
+                    }
+                });
+            },
+            { threshold: 0.2 },
+        );
+
+        const section = document.querySelector("#reveal-section");
+        if (section) observer.observe(section);
+    });
+</script>
+
+<input
+    type="radio"
+    name="modal-toggle"
+    id="modal-close"
+    class="modal-toggle"
+    checked
+/>
+
+<!-- Modal para el login -->
+<input type="radio" name="modal-toggle" id="login-modal" class="modal-toggle" />
+
+<div class="modal">
+    <div
+        class="modal-box max-w-md p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-hidden"
+    >
+        <label
+            for="modal-close"
+            class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+                />
+            </svg>
+        </label>
+
+        <form action="{#{ url_for('auth.login') }#}" method="POST">
+            <div class="p-8 pt-12">
+                <h3
+                    class="text-2xl sm:text-3xl text-center font-bold mb-8 text-secondary"
+                >
+                    ¡Bienvenido de vuelta!
+                </h3>
+
+                <div class="form-control w-full mb-5">
+                    <label class="label">
+                        <span class="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                        type="email"
+                        name="correo"
+                        placeholder="correo@ejemplo.com"
+                        class="input input-bordered w-full focus:input-secondary transition-colors"
+                    />
+                </div>
+
+                <div class="form-control w-full mb-6">
+                    <label class="label">
+                        <span class="label-text font-medium">Contraseña</span>
+                    </label>
+                    <input
+                        type="password"
+                        name="contraseña"
+                        placeholder="••••••••"
+                        class="input input-bordered w-full focus:input-secondary transition-colors"
+                    />
+                </div>
+
+                <button
+                    class="btn btn-secondary w-full mb-4 shadow-md hover:shadow-lg"
+                >
+                    Iniciar Sesión
+                </button>
+
+                <p class="text-center text-sm mt-4">
+                    ¿No tienes cuenta?
+                    <label
+                        for="signup-modal"
+                        class="link link-accent font-semibold cursor-pointer"
+                        >Regístrate</label
+                    >
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para el registro -->
+<input
+    type="radio"
+    name="modal-toggle"
+    id="signup-modal"
+    class="modal-toggle"
+/>
+
+<div class="modal">
+    <div
+        class="modal-box max-w-md p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-hidden"
+    >
+        <label
+            for="modal-close"
+            class="btn btn-sm btn-circle btn-ghost absolute right-3 top-3 z-10"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M6.758 17.243L12.001 12m5.243-5.243L12 12m0 0L6.758 6.757M12.001 12l5.243 5.243"
+                />
+            </svg>
+        </label>
+
+        <form action="{#{ url_for('auth.register') }#}" method="POST">
+            <div class="p-8 pt-12">
+                <h3
+                    class="text-2xl sm:text-3xl text-center font-bold mb-8 text-primary"
+                >
+                    ¡Hola!
+                </h3>
+
+                <div class="form-control w-full mb-5">
+                    <label class="label">
+                        <span class="label-text font-medium"
+                            >Nombre de usuario</span
+                        >
+                    </label>
+                    <input
+                        type="text"
+                        name="nombre"
+                        placeholder="Tu nombre"
+                        required
+                        class="input input-bordered w-full focus:input-primary transition-colors"
+                    />
+                </div>
+
+                <div class="form-control w-full mb-5">
+                    <label class="label">
+                        <span class="label-text font-medium">Email</span>
+                    </label>
+                    <input
+                        type="email"
+                        name="correo"
+                        placeholder="correo@ejemplo.com"
+                        class="input input-bordered w-full focus:input-primary transition-colors"
+                    />
+                </div>
+
+                <div class="form-control w-full mb-6">
+                    <label class="label">
+                        <span class="label-text font-medium">Contraseña</span>
+                    </label>
+                    <input
+                        type="password"
+                        placeholder="••••••••"
+                        name="contraseña"
+                        class="input input-bordered w-full focus:input-primary transition-colors"
+                    />
+                </div>
+
+                <button
+                    class="btn btn-primary w-full mb-4 shadow-md hover:shadow-lg"
+                >
+                    ¡Créame una cuenta!
+                </button>
+
+                <p class="text-center text-sm mt-4">
+                    ¿Ya tienes cuenta?
+                    <label
+                        for="login-modal"
+                        class="link link-accent font-semibold cursor-pointer"
+                        >Inicia sesión</label
+                    >
+                </p>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

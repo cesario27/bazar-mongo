@@ -1,0 +1,153 @@
+<!-- Grid de discos -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
+    {% for disco in discos %}
+    <a
+        href="{#{ url_for('detalle_disco.detalle_disco', id=disco.id_disco, slug=disco.slug) }#}"
+        class="group"
+    >
+        <div
+            class="card bg-base-200/70 border border-base-content/10 w-full h-full shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-95 cursor-pointer"
+        >
+            <figure class="relative h-48 overflow-hidden">
+                <img
+                    src="{{ disco.imagen }}"
+                    alt="{{ disco.titulo }}"
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+                <div
+                    class="absolute top-2 left-2 badge badge-secondary badge-outline shadow-sm backdrop-blur-sm bg-base-100/70"
+                >
+                    <strong>${{ "%.2f"|format(disco.precio) }}</strong>
+                </div>
+                <div
+                    class="absolute top-2 right-2 badge {{ 'badge-accent' if disco.formato else 'badge-primary' }} shadow-sm"
+                >
+                    {{ disco.formato_nombre }}
+                </div>
+            </figure>
+            <div class="card-body p-4">
+                <h2 class="card-title line-clamp-2 text-base items-start">
+                    {{ disco.titulo }}
+                </h2>
+                <p class="text-sm line-clamp-1">{{ disco.descripcion }}</p>
+            </div>
+        </div>
+    </a>
+    {% else %}
+    <div class="col-span-full text-center py-20">
+        <p class="text-lg text-base-content/50">
+            No se encontraron discos con esos filtros.
+        </p>
+        <button
+            onclick="
+                document
+                    .querySelector('#filter-form button[onclick^=limpiar]')
+                    .click()
+            "
+            class="btn btn-outline btn-sm mt-4"
+        >
+            Limpiar filtros
+        </button>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Info -->
+{% if total_discos > 0 %}
+<div class="text-center text-sm text-base-content/50 mb-2 mt-5">
+    Mostrando {{ ((page - 1) * per_page) + 1 }} - {{ [page * per_page,
+    total_discos] | min }} de {{ total_discos }} discos
+</div>
+{% endif %}
+
+<!-- Paginación con elipsis -->
+{% if total_pages > 1 %} {% set window = 2 %}
+
+<div class="join flex justify-center w-full my-10">
+    <!-- Anterior -->
+    {% if page > 1 %}
+    <button
+        class="join-item btn"
+        hx-get="{{ url_for('discos.discos', page=page-1, formato=formatos_select, generos=generos_select) }}"
+        hx-target="#discos-content"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+    >
+        «
+    </button>
+    {% else %}
+    <button class="join-item btn btn-disabled" disabled>«</button>
+    {% endif %}
+
+    <!-- Primera página -->
+    {% if 1 != page %}
+    <button
+        class="join-item btn"
+        hx-get="{{ url_for('discos.discos', page=1, formato=formatos_select, generos=generos_select) }}"
+        hx-target="#discos-content"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+    >
+        1
+    </button>
+    {% else %}
+    <button class="join-item btn btn-active" disabled>1</button>
+    {% endif %}
+
+    <!-- izquierda -->
+    {% if page - window > 2 %}
+    <button class="join-item btn btn-disabled" disabled>...</button>
+    {% endif %}
+
+    <!-- centro -->
+    {% for p in range([2, page - window] | max, [total_pages, page + window] |
+    min + 1) %} {% if p == page %}
+    <button class="join-item btn btn-active" disabled>{{ p }}</button>
+    {% else %}
+    <button
+        class="join-item btn"
+        hx-get="{{ url_for('discos.discos', page=p, formato=formatos_select, generos=generos_select) }}"
+        hx-target="#discos-content"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+    >
+        {{ p }}
+    </button>
+    {% endif %} {% endfor %}
+
+    <!-- derecha -->
+    {% if page + window < total_pages - 1 %}
+    <button class="join-item btn btn-disabled" disabled>...</button>
+    {% endif %}
+
+    <!-- Última página -->
+    {% if total_pages > 1 %} {% if total_pages != page %}
+    <button
+        class="join-item btn"
+        hx-get="{{ url_for('discos.discos', page=total_pages, formato=formatos_select, generos=generos_select) }}"
+        hx-target="#discos-content"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+    >
+        {{ total_pages }}
+    </button>
+    {% else %}
+    <button class="join-item btn btn-active" disabled>{{ total_pages }}</button>
+    {% endif %} {% endif %}
+
+    <!-- Siguiente -->
+    {% if page < total_pages %}
+    <button
+        class="join-item btn"
+        hx-get="{{ url_for('discos.discos', page=page+1, formato=formatos_select, generos=generos_select) }}"
+        hx-target="#discos-content"
+        hx-swap="innerHTML"
+        hx-push-url="true"
+    >
+        »
+    </button>
+    {% else %}
+    <button class="join-item btn btn-disabled" disabled>»</button>
+    {% endif %}
+</div>
+{% endif %}

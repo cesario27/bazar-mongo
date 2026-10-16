@@ -1,0 +1,165 @@
+{% extends "base.html" %} {% block title %}Ventas | Admin{% endblock %} {% block
+content %}
+<div class="container mx-auto px-4 py-8 lg:py-12">
+    <h1 class="text-4xl font-black uppercase tracking-tighter mb-8">
+        Estadísticas de Ventas
+    </h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Últimas ventas -->
+        <div class="card bg-base-200 border border-base-300 shadow-xl">
+            <div class="card-body">
+                <h3 class="font-bold text-xl mb-4">Últimas transacciones</h3>
+                <div class="overflow-x-auto max-h-[28rem]">
+                    <table class="table table-zebra table-sm w-full">
+                        <thead class="bg-base-300">
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Comisión</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in movimientos %}
+                            <tr>
+                                <td class="font-mono">
+                                    #{{ m.id_movimiento }}
+                                </td>
+                                <td class="text-sm opacity-80">
+                                    {{ m.fecha.strftime('%d/%m/%Y %H:%M') if
+                                    m.fecha else '-' }}
+                                </td>
+                                <td class="font-bold">
+                                    ${{ "%.2f"|format(m.total) }}
+                                </td>
+                                <td class="font-bold text-success">
+                                    ${{ "%.2f"|format(m.comision) }}
+                                </td>
+                                <td>
+                                    {% if m.tipo == 1 %}
+                                    <span class="badge badge-sm badge-success"
+                                        >Venta</span
+                                    >
+                                    {% elif m.tipo == 2 %}
+                                    <span class="badge badge-sm badge-warning"
+                                        >Subasta</span
+                                    >
+                                    {% else %}
+                                    <span class="badge badge-sm"
+                                        >{{ m.tipo }}</span
+                                    >
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td
+                                    colspan="5"
+                                    class="text-center py-8 opacity-50"
+                                >
+                                    Sin movimientos registrados
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top vendedores -->
+        <div class="card bg-base-200 border border-base-300 shadow-xl">
+            <div class="card-body">
+                <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="1em"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    Top vendedores
+                </h3>
+                <div class="overflow-x-auto max-h-[28rem]">
+                    <table class="table table-zebra table-sm w-full">
+                        <thead class="bg-base-300">
+                            <tr>
+                                <th>Vendedor</th>
+                                <th class="text-center">Ventas</th>
+                                <th class="text-center">Discos</th>
+                                <th class="text-right">Ingresos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for v in top_vendedores %}
+                            <tr
+                                class="{{ 'bg-primary/10 font-bold' if loop.first else '' }}"
+                            >
+                                <td>
+                                    <div class="flex items-center gap-3">
+                                        <div class="avatar">
+                                            <div class="w-8 rounded-full">
+                                                {% if v.icono_usuario %}
+                                                <img
+                                                    src="{{ v.icono_usuario }}"
+                                                    alt="{{ v.nombre }}"
+                                                />
+                                                {% else %}
+                                                <div
+                                                    class="bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs w-full h-full"
+                                                >
+                                                    {{ v.nombre[0]|upper }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="font-bold"
+                                                >{{ v.nombre }}</span
+                                            >
+                                            {% if loop.first %}
+                                            <span
+                                                class="badge badge-xs badge-primary ml-1"
+                                                >#1</span
+                                            >
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    {{ v.total_ventas }}
+                                </td>
+                                <td class="text-center">
+                                    {{ v.discos_vendidos }}
+                                </td>
+                                <td class="text-right font-bold text-success">
+                                    ${{ "%.2f"|format(v.ingresos) }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td
+                                    colspan="4"
+                                    class="text-center py-8 opacity-50"
+                                >
+                                    Sin ventas registradas
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

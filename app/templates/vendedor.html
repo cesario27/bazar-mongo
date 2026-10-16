@@ -1,0 +1,952 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- div pa las estadísticas arriba, publicaciones abajo -->
+<div class="container mx-auto p-4 flex flex-col gap-10">
+    <!-- Estadísticas -->
+    <section
+        class="stats stats-vertical lg:stats-horizontal w-full rounded-2xl border border-white/10 bg-base-200/40 backdrop-blur-md shadow-xl overflow-hidden"
+    >
+        <!-- Ventas -->
+        <div class="stat px-8 py-6 relative group">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+            ></div>
+            <div class="relative">
+                <div
+                    class="stat-title text-base-content/60 text-sm font-medium uppercase tracking-wider mb-1"
+                >
+                    Ventas Totales
+                </div>
+                <div
+                    class="stat-value text-4xl font-black text-primary drop-shadow-sm"
+                >
+                    ${{ "%.2f"|format(stats.ventas) }}
+                </div>
+                <div
+                    class="stat-desc text-success text-xs mt-1 flex items-center gap-1"
+                >
+                    <svg
+                        class="w-3 h-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="3"
+                            d="M5 10l7-7m0 0l7 7m-7-7v18"
+                        />
+                    </svg>
+                    {{ stats.total_movimientos }} transacciones
+                </div>
+            </div>
+        </div>
+
+        <!-- Subastas -->
+        <div class="stat px-8 py-6 relative group">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+            ></div>
+            <div class="relative">
+                <div
+                    class="stat-title text-base-content/60 text-sm font-medium uppercase tracking-wider mb-1"
+                >
+                    Subastas Activas
+                </div>
+                <div
+                    class="stat-value text-4xl font-black text-secondary drop-shadow-sm"
+                >
+                    {{ stats.subastas_activas }}
+                </div>
+                <div
+                    class="stat-desc text-info text-xs mt-1 flex items-center gap-1"
+                >
+                    <span
+                        class="w-1.5 h-1.5 rounded-full bg-info animate-pulse"
+                    ></span>
+                    en curso
+                </div>
+            </div>
+        </div>
+
+        <!-- Calificación -->
+        <div class="stat px-8 py-6 relative group">
+            <div
+                class="absolute inset-0 bg-gradient-to-br from-orange-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"
+            ></div>
+            <div class="relative">
+                <div
+                    class="stat-title text-base-content/60 text-sm font-medium uppercase tracking-wider mb-1"
+                >
+                    Reputación
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <div
+                        class="stat-value text-4xl font-black text-orange-400 drop-shadow-sm"
+                    >
+                        {{ stats.calificacion }}
+                    </div>
+                    <span class="text-base-content/30 text-sm font-medium"
+                        >/ 5</span
+                    >
+                </div>
+                <div class="rating rating-sm gap-0.5 mt-2">
+                    {% for i in range(1, 6) %}
+                    <div
+                        class="mask mask-star-2 {{ 'bg-orange-400' if i <= stats.calificacion else 'bg-base-content/15' }} w-5 h-5"
+                        aria-label="{{ i }} star"
+                    ></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ─── Mis Ventas ─── -->
+    <section class="w-full mb-5">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-success"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+            </svg>
+            Mis Ventas
+        </h2>
+
+        {% if mis_ventas %}
+        <div
+            class="card bg-base-200/70 border border-base-content/10 shadow-lg overflow-hidden"
+        >
+            <div class="overflow-x-auto max-h-[28rem]">
+                <table class="table table-zebra w-full">
+                    <thead class="bg-base-300">
+                        <tr>
+                            <th>Comprador</th>
+                            <th>Dirección</th>
+                            <th>Disco</th>
+                            <th>Tipo</th>
+                            <th>Fecha</th>
+                            <th class="text-right">Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mov, det, disco, comprador in mis_ventas %}
+                        <tr>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar">
+                                        <div class="w-8 rounded-full">
+                                            {% if comprador.icono_usuario %}
+                                            <img
+                                                src="{{ comprador.icono_usuario }}"
+                                                alt="{{ comprador.nombre }}"
+                                            />
+                                            {% else %}
+                                            <div
+                                                class="bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs w-full h-full"
+                                            >
+                                                {{ comprador.nombre[0]|upper }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <span class="font-bold text-sm"
+                                        >{{ comprador.nombre }}</span
+                                    >
+                                </div>
+                            </td>
+                            <td>
+                                <span
+                                    class="text-xs opacity-70 max-w-[8rem] line-clamp-2"
+                                    title="{{ comprador.direccion or 'Sin dirección' }}"
+                                >
+                                    {{ comprador.direccion or '—' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <img
+                                        src="{{ disco.imagen }}"
+                                        alt="{{ disco.titulo }}"
+                                        class="w-8 h-8 rounded object-cover"
+                                    />
+                                    <div>
+                                        <p
+                                            class="font-bold text-sm line-clamp-1"
+                                        >
+                                            {{ disco.titulo }}
+                                        </p>
+                                        <p class="text-xs opacity-60">
+                                            {{ disco.artista }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if mov.tipo == 1 %}
+                                <span class="badge badge-sm badge-success"
+                                    >Venta</span
+                                >
+                                {% elif mov.tipo == 2 %}
+                                <span class="badge badge-sm badge-warning"
+                                    >Subasta</span
+                                >
+                                {% else %}
+                                <span class="badge badge-sm"
+                                    >{{ mov.tipo }}</span
+                                >
+                                {% endif %}
+                            </td>
+                            <td class="text-sm opacity-70">
+                                {{ mov.fecha.strftime('%d/%m/%Y %H:%M') if
+                                mov.fecha else '-' }}
+                            </td>
+                            <td class="text-right font-bold text-success">
+                                ${{ "%.2f"|format(det.precio_unitario) }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info shadow-lg">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                class="stroke-current shrink-0 w-6 h-6"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+            </svg>
+            <span
+                >Aún no tienes ventas registradas. ¡Publica discos para empezar
+                a vender!</span
+            >
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Mis Publicaciones -->
+    <section class="w-full mb-5" id="mis-publicaciones">
+        {% if mis_discos %}
+        <h2 class="text-xl font-bold mb-4">Mis Publicaciones</h2>
+        <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+            {% for disco in mis_discos %}
+            <div
+                class="card bg-base-200/70 border border-base-content/10 w-full h-full shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group {{ 'ring-2 ring-warning/50' if disco.estado == 1 }}"
+            >
+                <figure class="relative h-48 overflow-hidden rounded-t-2xl">
+                    <img
+                        src="{{ disco.imagen }}"
+                        alt="{{ disco.titulo }}"
+                        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 {{ 'opacity-60' if disco.estado == 1 }}"
+                    />
+                    <!-- Badge formato -->
+                    <div
+                        class="absolute top-2 right-2 badge {{ 'badge-accent' if disco.formato else 'badge-primary' }} shadow-sm"
+                    >
+                        {{ 'Vinilo' if disco.formato == 1 else 'CD' }}
+                    </div>
+                    <!-- Badge precio -->
+                    <div
+                        class="absolute top-2 left-2 badge badge-secondary badge-outline shadow-sm backdrop-blur-sm bg-base-100/60"
+                    >
+                        ${{ "%.2f"|format(disco.precio) }}
+                    </div>
+                    <!-- Badge "En subasta" -->
+                    {% if disco.estado == 1 %}
+                    <div
+                        class="absolute bottom-2 left-2 badge badge-warning gap-1 shadow-md"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2.5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path
+                                d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018"
+                            />
+                            <path
+                                d="M2.686 10.462a2.5 2.5 0 0 0 0 3.536l2.829 2.828a2.5 2.5 0 0 0 4.095-2.681l.791-.791l6.407 7.392a2.793 2.793 0 1 0 3.94-3.94l-7.392-6.407l.791-.79a2.5 2.5 0 0 0 2.681-4.096L14 2.684a2.5 2.5 0 0 0-4.095 2.681L5.368 9.902a2.5 2.5 0 0 0-2.682.56"
+                            />
+                        </svg>
+                        En subasta
+                    </div>
+                    {% endif %}
+                </figure>
+                <div class="card-body p-4">
+                    <h3 class="card-title text-base line-clamp-2 items-start">
+                        {{ disco.titulo }}
+                    </h3>
+                    <p class="text-sm text-base-content/70 line-clamp-1 mb-1">
+                        {{ disco.artista }}
+                    </p>
+                    <p class="text-xs text-base-content/50 line-clamp-2 mb-3">
+                        {{ disco.descripcion or 'Sin descripción' }}
+                    </p>
+                    <!-- Acciones: solo para discos en venta normal -->
+                    {% if disco.estado == 0 %}
+                    <div
+                        class="card-actions justify-end gap-2 mt-auto pt-2 border-t border-base-content/5"
+                    >
+                        <button
+                            hx-get="{{ url_for('vendedor.editar_disco_form', id_disco=disco.id_disco) }}"
+                            hx-target="#editar-disco-content"
+                            class="btn btn-xs btn-outline btn-primary gap-1"
+                            onclick="editar_disco.showModal()"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"
+                                />
+                            </svg>
+                            Editar
+                        </button>
+                        <button
+                            hx-get="{{ url_for('vendedor.eliminar_disco_form', id_disco=disco.id_disco) }}"
+                            hx-target="#eliminar-disco-content"
+                            class="btn btn-xs btn-outline btn-error gap-1"
+                            onclick="eliminar_disco.showModal()"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M3 6h18" />
+                                <path
+                                    d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"
+                                />
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                            </svg>
+                            Eliminar
+                        </button>
+                    </div>
+                    {% else %}
+                    <div
+                        class="mt-auto pt-2 border-t border-base-content/5 space-y-2"
+                    >
+                        <span
+                            class="text-xs text-warning font-medium block text-center"
+                            >Este disco está en subasta activa</span
+                        >
+                        <form
+                            method="POST"
+                            action="{{ url_for('vendedor.cancelar_subasta', id_disco=disco.id_disco) }}"
+                            onsubmit="
+                                return confirm(
+                                    '¿Cancelar la subasta? El disco volverá a venta normal.',
+                                );
+                            "
+                        >
+                            <button
+                                type="submit"
+                                class="btn btn-xs btn-outline btn-warning w-full"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"
+                                    />
+                                    <path d="M12 8v4M12 16h.01" />
+                                </svg>
+                                Cancelar subasta
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info shadow-lg">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                class="stroke-current shrink-0 w-6 h-6"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                ></path>
+            </svg>
+            <span
+                >Aún no has publicado ningún disco. ¡Usa el botón + para
+                comenzar!</span
+            >
+        </div>
+        {% endif %}
+    </section>
+</div>
+
+<!-- FAB -->
+<div class="fixed bottom-25 right-6 z-[100]">
+    <div class="dropdown dropdown-top dropdown-end">
+        <div
+            tabindex="0"
+            role="button"
+            class="btn btn-lg btn-circle btn-secondary shadow-xl border-none items-center justify-center w-14 h-14"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="currentColor"
+                    d="M11 13H5v-2h6V5h2v6h6v2h-6v6h-2z"
+                />
+            </svg>
+        </div>
+        <ul
+            tabindex="0"
+            class="dropdown-content z-[1] flex flex-col gap-4 mb-4 items-center"
+        >
+            <li>
+                <div
+                    class="tooltip tooltip-left tooltip-accent"
+                    data-tip="Vender Disco"
+                >
+                    <button
+                        onclick="vender_disco.showModal()"
+                        class="btn btn-lg btn-circle shadow-lg bg-base-100 border-base-300 hover:btn-primary flex items-center justify-center"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M0 0h24v24H0z" fill="none" />
+                            <g
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.5"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M17.5 5a1.5 1.5 0 1 1 0 3a1.5 1.5 0 0 1 0-3"
+                                />
+                                <path
+                                    d="M2.774 11.144c-1.003 1.12-1.024 2.81-.104 4a34 34 0 0 0 6.186 6.186c1.19.92 2.88.899 4-.104a92 92 0 0 0 8.516-8.698a1.95 1.95 0 0 0 .47-1.094c.164-1.796.503-6.97-.902-8.374s-6.578-1.066-8.374-.901a1.95 1.95 0 0 0-1.094.47a92 92 0 0 0-8.698 8.515Z"
+                                />
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M13.788 12.367c.022-.401.134-1.135-.476-1.693m0 0a2.3 2.3 0 0 0-.797-.451c-1.257-.443-2.8 1.039-1.708 2.396c.587.73 1.04.954.996 1.782c-.03.582-.602 1.191-1.356 1.423c-.655.202-1.378-.065-1.835-.576c-.559-.624-.502-1.212-.507-1.468m5.208-3.105L14 9.986m-5.34 5.34l-.653.653"
+                                />
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </li>
+            <li>
+                <div
+                    class="tooltip tooltip-left tooltip-primary"
+                    data-tip="Crear Subasta"
+                >
+                    <button
+                        onclick="crear_subasta.showModal()"
+                        class="btn btn-lg btn-circle shadow-lg bg-base-100 border-base-300 hover:btn-primary flex items-center justify-center"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M0 0h24v24H0z" fill="none" />
+                            <g fill="none">
+                                <path
+                                    d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"
+                                />
+                                <path
+                                    fill="currentColor"
+                                    d="M2.686 10.462a2.5 2.5 0 0 0 0 3.536l2.829 2.828a2.5 2.5 0 0 0 4.095-2.681l.791-.791l6.407 7.392a2.793 2.793 0 1 0 3.94-3.94l-7.392-6.407l.791-.79a2.5 2.5 0 0 0 2.681-4.096L14 2.684a2.5 2.5 0 0 0-4.095 2.681L5.368 9.902a2.5 2.5 0 0 0-2.682.56"
+                                />
+                            </g>
+                        </svg>
+                    </button>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Modal: Publicar Disco -->
+<dialog class="modal" id="vender_disco">
+    <div
+        class="modal-box max-w-2xl p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-auto max-h-[90vh]"
+    >
+        <div class="bg-accent p-6 text-secondary-content">
+            <h3 class="text-2xl font-bold flex items-center gap-2">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 16 16"
+                >
+                    <path d="M0 0h16v16H0z" fill="none" />
+                    <path
+                        fill="currentColor"
+                        d="M8 6a2 2 0 1 1 .001 3.999A2 2 0 0 1 8 6m0 3a1 1 0 1 1 0-2a1 1 0 0 1 0 2m0-7a6 6 0 1 0 0 12A6 6 0 0 0 8 2"
+                    />
+                </svg>
+                Publicar Disco
+            </h3>
+            <p class="text-sm opacity-80 mt-2">
+                Completa los detalles del álbum para ponerlo a la venta.
+            </p>
+        </div>
+
+        <form
+            action="{{ url_for('vendedor.crear_disco')}}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="p-8 space-y-5"
+        >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Título del Álbum</span
+                        ></label
+                    >
+                    <input
+                        type="text"
+                        name="titulo"
+                        placeholder="Ej: Dark Side of the Moon"
+                        autofocus
+                        class="input input-bordered focus:input-secondary w-full"
+                        required
+                    />
+                </div>
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Artista / Banda</span
+                        ></label
+                    >
+                    <input
+                        type="text"
+                        name="artista"
+                        placeholder="Ej: Pink Floyd"
+                        class="input input-bordered focus:input-secondary w-full"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Género</span
+                        ></label
+                    >
+                    <select
+                        name="genero"
+                        class="select select-bordered focus:select-secondary w-full"
+                        required
+                    >
+                        <option disabled selected>Selecciona uno</option>
+                        {% for id_gen, nombre_gen in mapa_generos %}
+                        <option value="{{ nombre_gen }}">
+                            {{ nombre_gen }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Formato</span
+                        ></label
+                    >
+                    <select
+                        name="formato"
+                        class="select select-bordered focus:select-secondary w-full"
+                        required
+                    >
+                        <option disabled selected>Selecciona uno</option>
+                        <option value="CD">CD</option>
+                        <option value="vinilo">Vinilo</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Precio</span
+                        ></label
+                    >
+                    <label
+                        class="input input-bordered focus:input-secondary w-full flex items-center gap-2"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M0 0h24v24H0z" fill="none" />
+                            <path
+                                fill="currentColor"
+                                d="M17 12v-1h-4V6h4V4h-4V1h-2v3H7v1H6v7h1v1h4v5H6v2h5v3h2v-3h4v-1h1v-7Zm-6-1H9v-1H8V7h1V6h2Zm4 6v1h-2v-5h2v1h1v3Z"
+                            />
+                        </svg>
+                        <input
+                            type="number"
+                            name="precio"
+                            required
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            class="grow"
+                        />
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Descripción</span
+                        ></label
+                    >
+                    <input
+                        type="text"
+                        name="descripcion"
+                        placeholder="Opcional..."
+                        class="input input-bordered focus:input-secondary w-full"
+                    />
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label class="label"
+                    ><span class="label-text font-semibold">Imagen</span></label
+                >
+                <input
+                    id="file-input-venta"
+                    type="file"
+                    name="imagen"
+                    accept="image/*"
+                    onchange="previewImage(event, 'venta')"
+                    class="file-input file-input-bordered file-input-accent w-full"
+                    required
+                />
+                <div
+                    id="preview-container-venta"
+                    class="hidden mt-4 relative w-full flex justify-center bg-base-200 rounded-lg p-4 border-2 border-dashed border-base-300"
+                >
+                    <img
+                        id="image-preview-venta"
+                        src=""
+                        alt="Vista previa"
+                        class="max-h-64 rounded-md shadow-md object-cover"
+                    />
+                    <button
+                        type="button"
+                        onclick="resetImage('venta')"
+                        class="btn btn-circle btn-xs btn-error absolute bottom-2 right-2"
+                    >
+                        ✕
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal-action flex gap-2 pt-4">
+                <button
+                    type="button"
+                    onclick="
+                        vender_disco.close();
+                        document.activeElement.blur();
+                    "
+                    class="btn btn-ghost"
+                >
+                    Cerrar
+                </button>
+                <button type="submit" class="btn btn-accent px-8">
+                    ¡Publicar!
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Modal: Crear Subasta -->
+<dialog class="modal" id="crear_subasta">
+    <div
+        class="modal-box max-w-2xl p-0 relative bg-base-100 shadow-2xl border border-base-300/50 overflow-auto max-h-[90vh]"
+    >
+        <div class="bg-primary p-6 text-primary-content">
+            <h3 class="text-2xl font-bold flex items-center gap-2">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <g fill="none">
+                        <path
+                            d="m12.593 23.258l-.011.002l-.071.035l-.02.004l-.014-.004l-.071-.035q-.016-.005-.024.005l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.017-.018m.265-.113l-.013.002l-.185.093l-.01.01l-.003.011l.018.43l.005.012l.008.007l.201.093q.019.005.029-.008l.004-.014l-.034-.614q-.005-.018-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.004-.011l.017-.43l-.003-.012l-.01-.01z"
+                        />
+                        <path
+                            fill="currentColor"
+                            d="M2.686 10.462a2.5 2.5 0 0 0 0 3.536l2.829 2.828a2.5 2.5 0 0 0 4.095-2.681l.791-.791l6.407 7.392a2.793 2.793 0 1 0 3.94-3.94l-7.392-6.407l.791-.79a2.5 2.5 0 0 0 2.681-4.096L14 2.684a2.5 2.5 0 0 0-4.095 2.681L5.368 9.902a2.5 2.5 0 0 0-2.682.56"
+                        />
+                    </g>
+                </svg>
+                Iniciar Subasta
+            </h3>
+            <p class="text-sm opacity-80 mt-2">
+                Selecciona el disco que quieres subastar.
+            </p>
+        </div>
+
+        <form
+            action="{{ url_for('vendedor.crear_subasta') }}"
+            method="post"
+            class="p-8 space-y-5"
+        >
+            <div class="form-control">
+                <label class="label"
+                    ><span class="label-text font-semibold"
+                        >Disco a subastar</span
+                    ></label
+                >
+                <select
+                    name="disco_id"
+                    class="select select-bordered focus:select-secondary w-full"
+                    required
+                >
+                    <option disabled selected>
+                        Selecciona uno de tus discos
+                    </option>
+                    {% set discos_disponibles = mis_discos|selectattr('estado',
+                    'equalto', 0)|list %} {% if discos_disponibles %} {% for
+                    disco in discos_disponibles %}
+                    <option value="{{ disco.id_disco }}">
+                        {{ disco.titulo }} — {{ disco.artista }}
+                    </option>
+                    {% endfor %} {% else %}
+                    <option disabled>
+                        No tienes discos disponibles para subastar
+                    </option>
+                    {% endif %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Precio Inicial</span
+                        ></label
+                    >
+                    <label
+                        class="input input-bordered focus:input-secondary w-full flex items-center gap-2"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M0 0h24v24H0z" fill="none" />
+                            <path
+                                fill="currentColor"
+                                d="M17 12v-1h-4V6h4V4h-4V1h-2v3H7v1H6v7h1v1h4v5H6v2h5v3h2v-3h4v-1h1v-7Zm-6-1H9v-1H8V7h1V6h2Zm4 6v1h-2v-5h2v1h1v3Z"
+                            />
+                        </svg>
+                        <input
+                            type="number"
+                            name="precio_inicial"
+                            required
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            class="grow"
+                        />
+                    </label>
+                </div>
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Minimo deseado</span
+                        ></label
+                    >
+                    <label
+                        class="input input-bordered focus:input-secondary w-full flex items-center gap-2"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="1em"
+                            height="1em"
+                            viewBox="0 0 24 24"
+                        >
+                            <path d="M0 0h24v24H0z" fill="none" />
+                            <path
+                                fill="currentColor"
+                                d="M17 12v-1h-4V6h4V4h-4V1h-2v3H7v1H6v7h1v1h4v5H6v2h5v3h2v-3h4v-1h1v-7Zm-6-1H9v-1H8V7h1V6h2Zm4 6v1h-2v-5h2v1h1v3Z"
+                            />
+                        </svg>
+                        <input
+                            type="number"
+                            name="precio_deseado"
+                            required
+                            placeholder="0.00"
+                            step="0.01"
+                            min="0"
+                            class="grow"
+                        />
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Fecha de Inicio</span
+                        ></label
+                    >
+                    <input
+                        type="datetime-local"
+                        name="fecha_inicio"
+                        class="input input-bordered focus:input-secondary w-full"
+                        required
+                    />
+                </div>
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Fecha de Cierre</span
+                        ></label
+                    >
+                    <input
+                        type="datetime-local"
+                        name="fecha_cierre"
+                        class="input input-bordered focus:input-secondary w-full"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div class="modal-action flex gap-2 pt-4">
+                <button
+                    type="button"
+                    onclick="crear_subasta.close()"
+                    class="btn btn-ghost"
+                >
+                    Cerrar
+                </button>
+                <button type="submit" class="btn btn-primary px-8">
+                    ¡Iniciar!
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+    function previewImage(event, tipo) {
+        const input = event.target;
+        const previewContainer = document.getElementById(
+            "preview-container-" + tipo,
+        );
+        const previewImage = document.getElementById("image-preview-" + tipo);
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                previewContainer.classList.remove("hidden");
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function resetImage(tipo) {
+        const input = document.getElementById("file-input-" + tipo);
+        const previewContainer = document.getElementById(
+            "preview-container-" + tipo,
+        );
+        const previewImage = document.getElementById("image-preview-" + tipo);
+
+        input.value = "";
+        previewImage.src = "";
+        previewContainer.classList.add("hidden");
+    }
+</script>
+
+<!-- Modal: Editar Disco -->
+<dialog class="modal" id="editar_disco">
+    <div id="editar-disco-content"></div>
+</dialog>
+
+<!-- Modal: Eliminar Disco -->
+<dialog class="modal" id="eliminar_disco">
+    <div id="eliminar-disco-content"></div>
+</dialog>
+
+{% endblock %}

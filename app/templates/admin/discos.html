@@ -1,0 +1,127 @@
+{% extends "base.html" %} {% block title %}Discos | Admin{% endblock %} {% block
+content %}
+<div class="container mx-auto px-4 py-8 lg:py-12">
+    <h1 class="text-4xl font-black uppercase tracking-tighter mb-8">
+        Gestión de Discos
+    </h1>
+
+    <div class="card bg-base-200 border border-base-300 shadow-xl">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto max-h-[32rem]">
+                <table class="table table-zebra w-full">
+                    <thead class="bg-base-300 sticky top-0 z-10">
+                        <tr>
+                            <th>ID</th>
+                            <th>Disco</th>
+                            <th>Vendedor</th>
+                            <th>Formato</th>
+                            <th>Estado</th>
+                            <th class="text-right">Precio</th>
+                            <th class="text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for disco, vendedor in discos %}
+                        <tr>
+                            <td class="font-mono">{{ disco.id_disco }}</td>
+                            <td>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar">
+                                        <div class="w-10 rounded-lg">
+                                            <img
+                                                src="{{ disco.imagen }}"
+                                                alt="{{ disco.titulo }}"
+                                                class="object-cover w-full h-full"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a
+                                            href="{{ url_for('detalle_disco.detalle_disco', id=disco.id_disco, slug=disco.slug) }}"
+                                            class="font-bold text-sm hover:text-primary hover:underline transition-colors"
+                                            target="_blank"
+                                        >
+                                            {{ disco.titulo }}
+                                        </a>
+                                        <p class="text-xs opacity-60">
+                                            {{ disco.artista }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <div class="avatar">
+                                        <div class="w-6 rounded-full">
+                                            {% if vendedor.icono_usuario %}
+                                            <img
+                                                src="{{ vendedor.icono_usuario }}"
+                                                alt="{{ vendedor.nombre }}"
+                                            />
+                                            {% else %}
+                                            <div
+                                                class="bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs w-full h-full"
+                                            >
+                                                {{ vendedor.nombre[0]|upper }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <span class="text-sm"
+                                        >{{ vendedor.nombre }}</span
+                                    >
+                                </div>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge badge-sm {{ 'badge-accent' if disco.formato else 'badge-primary' }}"
+                                >
+                                    {{ 'Vinilo' if disco.formato else 'CD' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if disco.estado == 0 %}
+                                <span class="badge badge-sm badge-ghost"
+                                    >En venta</span
+                                >
+                                {% elif disco.estado == 1 %}
+                                <span class="badge badge-sm badge-warning"
+                                    >En subasta</span
+                                >
+                                {% elif disco.estado == 2 %}
+                                <span class="badge badge-sm badge-success"
+                                    >Vendido</span
+                                >
+                                {% else %}
+                                <span class="badge badge-sm"
+                                    >{{ disco.estado }}</span
+                                >
+                                {% endif %}
+                            </td>
+                            <td class="text-right font-bold">
+                                ${{ "%.2f"|format(disco.precio) }}
+                            </td>
+                            <td class="text-right">
+                                <form
+                                    action="{{ url_for('admin.eliminar_disco', id=disco.id_disco) }}"
+                                    method="POST"
+                                    class="inline"
+                                    onsubmit="return confirm('¿Eliminar permanentemente {{ disco.titulo }}?');"
+                                >
+                                    <button
+                                        type="submit"
+                                        class="btn btn-error btn-sm btn-outline rounded-full"
+                                    >
+                                        Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

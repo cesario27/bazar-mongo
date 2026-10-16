@@ -1,0 +1,163 @@
+{% extends "base.html" %} {% block title %}Carrito | Bazar Stereo {% endblock %}
+{% block content %}
+
+<div class="container mx-auto px-4 py-8 lg:py-12 max-w-4xl">
+    <h1
+        class="text-4xl font-black uppercase tracking-tighter mb-8 flex items-center gap-3"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1.2em"
+            height="1.2em"
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"
+            />
+        </svg>
+        Tu Carrito
+    </h1>
+
+    {% if items %}
+    <div class="space-y-4">
+        {% for detalle, disco in items %}
+        <div
+            class="card bg-base-200/70 border border-base-content/10 shadow-md hover:shadow-lg transition-shadow"
+        >
+            <div class="card-body flex-row items-center gap-5 p-5">
+                <!-- Imagen -->
+                <div class="avatar">
+                    <div class="w-20 rounded-xl">
+                        <img
+                            src="{{ disco.imagen }}"
+                            alt="{{ disco.titulo }}"
+                        />
+                    </div>
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-lg truncate">
+                        {{ disco.titulo }}
+                    </h3>
+                    <p class="text-sm text-base-content/60">
+                        {{ disco.artista }}
+                    </p>
+                    <span
+                        class="badge badge-sm {{ 'badge-accent' if disco.formato else 'badge-primary' }} mt-1"
+                    >
+                        {{ 'Vinilo' if disco.formato else 'CD' }}
+                    </span>
+                </div>
+
+                <!-- Precio -->
+                <div class="text-right shrink-0">
+                    <p class="text-2xl font-black text-secondary">
+                        ${{ "%.2f"|format(detalle.precio) }}
+                    </p>
+                </div>
+
+                <!-- Eliminar -->
+                <form
+                    method="POST"
+                    action="{{ url_for('carrito.eliminar_del_carrito', id_detalle=detalle.id_detalle_carrito) }}"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-ghost btn-circle btn-sm hover:btn-error"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        >
+                            <path d="M3 6h18" />
+                            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Total y comprar -->
+    <div class="mt-8 card bg-base-200 border border-base-content/10 shadow-xl">
+        <div class="card-body p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-base-content/50 uppercase font-bold">
+                        Total a pagar
+                    </p>
+                    <p
+                        class="text-4xl font-black text-secondary tracking-tight mt-1"
+                    >
+                        ${{ "%.2f"|format(total) }}
+                        <span
+                            class="text-sm font-bold text-base-content/40 uppercase"
+                            >MXN</span
+                        >
+                    </p>
+                </div>
+                <form
+                    method="POST"
+                    action="{{ url_for('carrito.comprar_carrito') }}"
+                >
+                    <button
+                        type="submit"
+                        class="btn btn-primary btn-lg rounded-full font-black uppercase tracking-widest text-lg shadow-lg hover:shadow-primary/20 transition-shadow"
+                    >
+                        ¡Comprar todo!
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="80"
+            height="80"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-base-content/10 mb-6"
+        >
+            <path
+                d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"
+            />
+        </svg>
+        <h2 class="text-2xl font-bold text-base-content/30 mb-2">
+            Tu carrito está vacío
+        </h2>
+        <p class="text-base-content/40 mb-6">
+            Explora los discos disponibles y agrega los que te gusten
+        </p>
+        <a
+            href="{{ url_for('discos.discos') }}"
+            class="btn btn-primary btn-md rounded-full font-bold"
+        >
+            Ver discos
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

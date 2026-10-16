@@ -1,0 +1,536 @@
+{% extends "base.html" %} {% block title %}Bazar Stereo | Mi cuenta{% endblock
+%} {% block content %}
+<div class="container mx-auto px-4 py-12 max-w-5xl">
+    <!-- Cabecera del perfil -->
+    <div class="flex flex-col md:flex-row items-center gap-8 mb-12">
+        <div class="avatar online">
+            <div
+                class="w-32 md:w-40 rounded-full ring-4 ring-primary ring-offset-base-100 ring-offset-4"
+            >
+                {% if current_user.icono_usuario %}
+                <img
+                    src="{{ current_user.icono_usuario }}"
+                    alt="{{ current_user.nombre }}"
+                    class="w-full h-full object-cover"
+                />
+                {% else %}
+                <div
+                    class="w-full h-full bg-primary text-primary-content flex items-center justify-center font-bold text-[50px]"
+                >
+                    {{ current_user.nombre[0] | upper }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="text-center md:text-left flex-1">
+            <h1 class="text-4xl font-black text-base-content">
+                {{ current_user.nombre }}
+            </h1>
+            <p class="text-base text-base-content/60 mt-1">
+                {{ current_user.correo }}
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <label class="swap swap-rotate text-base-content/70">
+                <input type="checkbox" id="modo-vendedor" />
+                <span class="swap-off font-bold text-sm">🔹 Comprador</span>
+                <span class="swap-on font-bold text-sm text-warning"
+                    >💎 Vendedor</span
+                >
+            </label>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="grid grid-cols-2 md:grid-cols-2 gap-4 mb-12">
+        <div class="stat bg-base-200 rounded-box p-4 text-center shadow-sm">
+            <div class="stat-figure text-secondary text-2xl">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <path
+                        fill="currentColor"
+                        d="M17 18c-1.11 0-2 .89-2 2a2 2 0 0 0 2 2a2 2 0 0 0 2-2a2 2 0 0 0-2-2M1 2v2h2l3.6 7.59l-1.36 2.45c-.15.28-.24.61-.24.96a2 2 0 0 0 2 2h12v-2H7.42a.25.25 0 0 1-.25-.25q0-.075.03-.12L8.1 13h7.45c.75 0 1.41-.42 1.75-1.03l3.58-6.47c.07-.16.12-.33.12-.5a1 1 0 0 0-1-1H5.21l-.94-2M7 18c-1.11 0-2 .89-2 2a2 2 0 0 0 2 2a2 2 0 0 0 2-2a2 2 0 0 0-2-2"
+                    />
+                </svg>
+            </div>
+            <div class="stat-title text-xs opacity-60">Compras</div>
+            <div class="stat-value text-2xl">{{ total_compras }}</div>
+        </div>
+        <div class="stat bg-base-200 rounded-box p-4 text-center shadow-sm">
+            <div class="stat-figure text-warning text-2xl">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="1em"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                >
+                    <path d="M0 0h24v24H0z" fill="none" />
+                    <path
+                        fill="currentColor"
+                        d="M7 21v-2h4v-3.1q-1.225-.275-2.187-1.037T7.4 12.95q-1.875-.225-3.137-1.637T3 8V7q0-.825.588-1.412T5 5h2V3h10v2h2q.825 0 1.413.588T21 7v1q0 1.9-1.263 3.313T16.6 12.95q-.45 1.15-1.412 1.913T13 15.9V19h4v2zm0-10.2V7H5v1q0 .95.55 1.713T7 10.8m10 0q.9-.325 1.45-1.088T19 8V7h-2z"
+                    />
+                </svg>
+            </div>
+            <div class="stat-title text-xs opacity-60">Subastas ganadas</div>
+            <div class="stat-value text-2xl">{{ subastas_ganadas }}</div>
+        </div>
+    </div>
+
+    <!-- Sección de acciones -->
+    <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+        <button
+            class="btn btn-outline btn-accent px-8 rounded-full font-medium gap-2"
+            onclick="editar_perfil.showModal()"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <circle cx="12" cy="6" r="4" fill="currentColor" />
+                <path
+                    fill="currentColor"
+                    d="M20 17.5c0 2.485 0 4.5-8 4.5s-8-2.015-8-4.5S7.582 13 12 13s8 2.015 8 4.5"
+                />
+            </svg>
+            Editar perfil
+        </button>
+        <button
+            class="btn btn-outline btn-secondary px-8 rounded-full font-medium gap-2"
+            onclick="mis_pedidos.showModal()"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="currentColor"
+                    d="M5.12 5h13.75l-.94-1h-12zm15.42.23c.29.34.46.77.46 1.27V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6.5c0-.5.17-.93.46-1.27l1.38-1.68C5.12 3.21 5.53 3 6 3h12c.47 0 .88.21 1.15.55zM6 18h6v-3H6z"
+                />
+            </svg>
+            Mis pedidos
+        </button>
+        <a
+            href="{{ url_for('vendedor.panel_vendedor') }}"
+            id="btn-gestionar"
+            class="btn btn-secondary px-8 rounded-full font-medium gap-2 hidden"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                height="1em"
+                viewBox="0 0 24 24"
+            >
+                <path d="M0 0h24v24H0z" fill="none" />
+                <path
+                    fill="currentColor"
+                    d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10s10-4.477 10-10S17.523 2 12 2m5 11h-4v4h-2v-4H7v-2h4V7h2v4h4z"
+                />
+            </svg>
+            Gestionar publicaciones
+        </a>
+    </div>
+</div>
+
+<script>
+    document
+        .getElementById("modo-vendedor")
+        .addEventListener("change", function () {
+            document
+                .getElementById("btn-gestionar")
+                .classList.toggle("hidden", !this.checked);
+        });
+</script>
+
+<!-- Modal: Editar perfil -->
+<dialog id="editar_perfil" class="modal">
+    <div class="modal-box max-w-lg relative">
+        <button
+            type="button"
+            onclick="editar_perfil.close()"
+            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+        >
+            ✕
+        </button>
+
+        <h3 class="text-2xl font-bold mb-6">Editar perfil</h3>
+
+        <form
+            action="{{ url_for('mi_cuenta.actualizar_perfil') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="space-y-5"
+        >
+            <!-- Imagen de perfil -->
+            <div class="flex flex-col items-center gap-3">
+                <div class="avatar">
+                    <div
+                        class="w-24 rounded-full ring-2 ring-primary ring-offset-2"
+                    >
+                        {% if current_user.icono_usuario %}
+                        <img
+                            id="preview-perfil"
+                            src="{{ current_user.icono_usuario }}"
+                            alt="Foto de perfil"
+                            class="w-full h-full object-cover"
+                        />
+                        {% else %}
+                        <div
+                            id="preview-perfil-placeholder"
+                            class="w-full h-full bg-primary text-primary-content flex items-center justify-center font-bold text-3xl"
+                        >
+                            {{ current_user.nombre[0] | upper }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label"
+                        ><span class="label-text font-semibold"
+                            >Foto de perfil</span
+                        ></label
+                    >
+                    <input
+                        id="file-input-perfil"
+                        type="file"
+                        name="icono_usuario"
+                        accept="image/*"
+                        onchange="previewImagePerfil(event)"
+                        class="file-input file-input-bordered file-input-accent w-full"
+                    />
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label class="label"
+                    ><span class="label-text font-medium">Nombre</span></label
+                >
+                <input
+                    type="text"
+                    name="nombre"
+                    value="{{ current_user.nombre }}"
+                    class="input input-bordered w-full input-accent"
+                    required
+                />
+            </div>
+
+            <div class="form-control">
+                <label class="label"
+                    ><span class="label-text font-medium"
+                        >Dirección de envío</span
+                    ></label
+                >
+                <textarea
+                    name="direccion"
+                    class="textarea textarea-bordered w-full textarea-accent h-24"
+                    placeholder="Tu dirección completa"
+                >
+{{ current_user.direccion or '' }}</textarea
+                >
+            </div>
+
+            <!-- ─── Cambio de contraseña ─── -->
+            <div class="divider my-0"></div>
+            <div>
+                <h4 class="font-bold text-lg flex items-center gap-2 mb-3">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="1.2em"
+                        height="1.2em"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <path
+                            d="M12 17a4 4 0 0 0 4-4V5a4 4 0 1 0-8 0v8a4 4 0 0 0 4 4Z"
+                        />
+                        <path
+                            d="M5 10H3a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2m14 0h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2"
+                        />
+                        <path d="M12 17v4" />
+                    </svg>
+                    Cambiar contraseña
+                </h4>
+                <p class="text-xs opacity-50 mb-3">
+                    Deja en blanco si no quieres cambiarla
+                </p>
+
+                <div class="form-control mb-3">
+                    <label class="label"
+                        ><span class="label-text font-medium"
+                            >Contraseña actual</span
+                        ></label
+                    >
+                    <input
+                        type="password"
+                        name="contraseña_actual"
+                        placeholder="••••••••"
+                        class="input input-bordered w-full input-accent"
+                    />
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text font-medium"
+                                >Nueva contraseña</span
+                            ></label
+                        >
+                        <input
+                            type="password"
+                            name="contraseña_nueva"
+                            placeholder="Mín. 6 caracteres"
+                            minlength="6"
+                            class="input input-bordered w-full input-accent"
+                        />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text font-medium"
+                                >Confirmar nueva</span
+                            ></label
+                        >
+                        <input
+                            type="password"
+                            name="contraseña_confirmar"
+                            placeholder="Repite la nueva"
+                            class="input input-bordered w-full input-accent"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Método de pago -->
+            <div class="divider my-0"></div>
+            <div>
+                <h4 class="font-bold text-lg flex items-center gap-2 mb-3">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="1.2em"
+                        height="1.2em"
+                        viewBox="0 0 24 24"
+                    >
+                        <path d="M0 0h24v24H0z" fill="none" />
+                        <path
+                            fill="currentColor"
+                            d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2m0 14H4v-6h16zm0-10H4V6h16z"
+                        />
+                    </svg>
+                    Método de pago
+                </h4>
+
+                <div class="form-control">
+                    <label class="label"
+                        ><span class="label-text font-medium"
+                            >Número de tarjeta</span
+                        ></label
+                    >
+                    <input
+                        type="text"
+                        name="tarjeta_numero"
+                        value="{{ tarjeta_mostrada or '' }}"
+                        placeholder="1234 5678 9012 3456"
+                        maxlength="19"
+                        class="input input-bordered w-full input-accent"
+                        oninput="formatTarjeta(this)"
+                    />
+                    <label class="label">
+                        <span class="label-text-alt text-success text-xs">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="h-3 w-3 inline"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                                />
+                            </svg>
+                            Encriptado en la base de datos
+                        </span>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mt-3">
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text font-medium"
+                                >Vencimiento</span
+                            ></label
+                        >
+                        <input
+                            type="text"
+                            name="tarjeta_vencimiento"
+                            value="{{ current_user.tarjeta_vencimiento or '' }}"
+                            placeholder="MM/AA"
+                            maxlength="5"
+                            class="input input-bordered w-full input-accent"
+                            oninput="formatVencimiento(this)"
+                        />
+                    </div>
+                    <div class="form-control">
+                        <label class="label"
+                            ><span class="label-text font-medium"
+                                >CVV</span
+                            ></label
+                        >
+                        <input
+                            type="password"
+                            name="tarjeta_cvv"
+                            placeholder="•••"
+                            maxlength="4"
+                            class="input input-bordered w-full input-accent"
+                        />
+                        <label class="label">
+                            <span class="label-text-alt text-warning text-xs"
+                                >No se guarda en la base de datos</span
+                            >
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-action flex gap-2 pt-4">
+                <button
+                    type="button"
+                    onclick="editar_perfil.close()"
+                    class="btn btn-error btn-outline"
+                >
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary px-8">
+                    Guardar cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<!-- Modal mis pedidos -->
+<dialog id="mis_pedidos" class="modal">
+    <div class="modal-box max-w-4xl relative">
+        <!-- x para cerrar -->
+        <button
+            type="button"
+            onclick="mis_pedidos.close()"
+            class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+        >
+            ✕
+        </button>
+
+        <h3 class="text-2xl font-bold mb-2">Historial de pedidos</h3>
+        <p class="text-sm text-base-content/60 mb-6">Últimos 30 días</p>
+
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th>Disco</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Precio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if pedidos %} {% for mov, det, disco in pedidos %}
+                    <tr>
+                        <td class="font-medium">
+                            {{ disco.titulo }} — {{ disco.artista }}
+                        </td>
+                        <td>
+                            {% if mov.tipo == 1 %}
+                            <span class="badge badge-success">Compra</span>
+                            {% elif mov.tipo == 2 %}
+                            <span class="badge badge-warning">Subasta</span>
+                            {% else %}
+                            <span class="badge badge-sm">{{ mov.tipo }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ mov.fecha.strftime('%d/%m/%y') if mov.fecha else
+                            '-' }}
+                        </td>
+                        <td class="font-semibold">
+                            ${{ "%.2f"|format(det.precio_unitario) }}
+                        </td>
+                    </tr>
+                    {% endfor %} {% else %}
+                    <tr>
+                        <td
+                            colspan="4"
+                            class="text-center text-base-content/50 py-8"
+                        >
+                            Aún no tienes pedidos registrados
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal-action mt-4">
+            <button
+                type="button"
+                onclick="mis_pedidos.close()"
+                class="btn btn-ghost"
+            >
+                Cerrar
+            </button>
+        </div>
+    </div>
+</dialog>
+
+<script>
+    function previewImagePerfil(event) {
+        const input = event.target;
+        const previewImg = document.getElementById("preview-perfil");
+        const previewPlaceholder = document.getElementById(
+            "preview-perfil-placeholder",
+        );
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                if (previewImg) {
+                    previewImg.src = e.target.result;
+                } else if (previewPlaceholder) {
+                    // Reemplazar el placeholder con una imagen real
+                    previewPlaceholder.outerHTML =
+                        '<img id="preview-perfil" src="' +
+                        e.target.result +
+                        '" alt="Foto de perfil" class="w-full h-full object-cover" />';
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
+<script>
+    function formatTarjeta(input) {
+        let v = input.value.replace(/\D/g, "").substring(0, 16);
+        input.value = v.replace(/(.{4})/g, "$1 ").trim();
+    }
+    function formatVencimiento(input) {
+        let v = input.value.replace(/\D/g, "").substring(0, 4);
+        if (v.length >= 2) v = v.substring(0, 2) + "/" + v.substring(2);
+        input.value = v;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+<div
+    class="modal-box max-w-md p-6 bg-base-100 shadow-2xl border border-base-300/50"
+>
+    <h3 class="text-xl font-bold text-error mb-2 flex items-center gap-2">
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+        >
+            <path
+                fill="currentColor"
+                d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"
+            />
+        </svg>
+        ¿Eliminar?
+    </h3>
+    <p class="mb-6">
+        ¿Estás seguro de que quieres eliminar
+        <strong>{{ disco.titulo }}</strong> de {{ disco.artista }}? Esta acción
+        no se puede deshacer.
+    </p>
+
+    <form
+        hx-post="{{ url_for('vendedor.eliminar_disco', id_disco=disco.id_disco) }}"
+        hx-target="#mis-publicaciones"
+        hx-on::after-request="if(event.detail.successful) { eliminar_disco.close(); }"
+    >
+        <div class="modal-action flex gap-2 justify-end">
+            <button
+                type="button"
+                onclick="eliminar_disco.close()"
+                class="btn btn-ghost"
+            >
+                Cancelar
+            </button>
+            <button type="submit" class="btn btn-error">Eliminar</button>
+        </div>
+    </form>
+</div>

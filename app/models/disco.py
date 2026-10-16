@@ -12,7 +12,7 @@ from app.controladores.utils import slugify
 
 
 class Disco(Document):
-    id_disco = IntField()
+    id_disco = IntField(primary_key=True)
     estado = IntField()
     titulo = StringField()
     formato = BooleanField()

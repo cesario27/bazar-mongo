@@ -16,14 +16,11 @@ def subastas():
     formatos_select = [f for f in request.args.getlist("formato") if f]
     generos_select = request.args.getlist("generos")
 
-    # 2. PASO CLAVE: Buscar primero las subastas activas (estado=1)
-    # Esto es la "fuente de la verdad" de qué se está subastando
+    # 2. Buscar primero las subastas activas (estado=1)
     subastas_activas_qs = Subastas.objects(estado=1)
-
-    # Obtenemos los IDs de los discos que están en subasta
     discos_ids_en_subasta = [s.id_disco for s in subastas_activas_qs.only('id_disco')]
 
-    # Si no hay subastas activas, devolvemos el contexto vacío inmediatamente
+    # Si no hay subastas activas, devolvemos el contexto vacío
     if not discos_ids_en_subasta:
         context = {
             "subastas": [],
@@ -40,9 +37,10 @@ def subastas():
         return render_template("subastas.html", **context)
 
     # 3. Buscar los discos que corresponden a estas subastas
+    # Usamos id_disco__in porque ese es el nombre exacto del campo en el modelo
     discos_qs = Disco.objects(id_disco__in=discos_ids_en_subasta)
 
-    # 4. Aplicar filtros sobre los DISCOS
+    # 4. Aplicar filtros sobre los discos encontrados
     if current_user.is_authenticated:
         discos_qs = discos_qs.filter(id_usuario__ne=current_user.id_usuario)
 
@@ -67,10 +65,11 @@ def subastas():
         if generos_ids:
             discos_qs = discos_qs.filter(genero__in=generos_ids)
 
-    # 5. Obtener los IDs de los discos que sobrevivieron a todos los filtros
+    # 5. Obtener los IDs de los discos que sobrevivieron a los filtros
+    # CORRECCIÓN: Usar 'id_disco' en .only() en lugar de 'id'
     discos_ids_filtrados = [d.id_disco for d in discos_qs.only('id_disco')]
 
-    # 6. Volver a filtrar las subastas para que solo incluyan los discos que pasaron los filtros
+    # 6. Volver a filtrar las subastas para que solo incluyan los discos válidos
     subastas_qs = Subastas.objects(estado=1, id_disco__in=discos_ids_filtrados)
 
     # 7. Paginación
@@ -80,18 +79,18 @@ def subastas():
     page = min(page, total_pages)
     skip = (page - 1) * PER_PAGE
 
-    # Ejecutar consulta con paginación (.skip y .limit son los correctos en MongoEngine)
     subastas_result = list(subastas_qs.skip(skip).limit(PER_PAGE))
 
-    # 8. Mapeo manual: Adjuntar el objeto Disco a cada objeto Subasta para el template
+    # 8. Mapeo manual: Adjuntar el objeto Disco a cada objeto Subasta
     discos_ids_pagina = [s.id_disco for s in subastas_result]
+
+    # CORRECCIÓN: Usar 'id_disco__in' y 'd.id_disco' para el diccionario
     discos_map = {
         d.id_disco: d
         for d in Disco.objects(id_disco__in=discos_ids_pagina)
     }
 
     for subasta in subastas_result:
-        # Inyectamos el atributo 'disco' dinámicamente
         subasta.disco = discos_map.get(subasta.id_disco)
 
     # 9. Construir contexto
@@ -106,7 +105,7 @@ def subastas():
         "per_page": PER_PAGE,
     }
 
-    # 10. Retornar respuesta (HTMX o HTML completo)
+    # 10. Retornar respuesta
     if request.headers.get("HX-Request"):
         return render_template("partials/_subastas_grid.html", **context)
 

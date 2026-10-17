@@ -452,7 +452,7 @@
             </svg>
         </label>
 
-        <form action="{#{ url_for('auth.login') }#}" method="POST">
+        <form action="{{ url_for('auth.login') }}" method="POST">
             <div class="p-8 pt-12">
                 <h3
                     class="text-2xl sm:text-3xl text-center font-bold mb-8 text-secondary"
@@ -537,7 +537,7 @@
             </svg>
         </label>
 
-        <form action="{#{ url_for('auth.register') }#}" method="POST">
+        <form action="{{ url_for('auth.register') }}" method="POST">
             <div class="p-8 pt-12">
                 <h3
                     class="text-2xl sm:text-3xl text-center font-bold mb-8 text-primary"

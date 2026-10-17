@@ -4,8 +4,7 @@ import secrets
 from flask import Blueprint, flash, redirect, request, url_for
 from flask_login import login_required, login_user, logout_user
 
-from app.base import SessionLocal
-from app.modelos.usuario import Usuario
+from app.models.usuario import Usuario
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -20,44 +19,44 @@ def login():
     if request.method == "GET":
         return redirect(url_for("main.inicio"))
 
-    correo = request.form.get("correo", "").strip()
+    correo = request.form.get("correo", "").strip().lower()
     contraseña = request.form.get("contraseña", "")
 
-    session = SessionLocal()
-    try:
-        usuario = session.query(Usuario).filter_by(correo=correo).first()
+    usuario = Usuario.objects(correo__iexact=correo).first()
 
-        if not usuario:
-            flash("Este correo no está registrado", "error")
-            return redirect(url_for("main.inicio"))
+    # Debug
+    # print(f"Buscando correo: '{correo}'")
+    # print(f"Usuarios en BD: {[(u.correo, u.nombre) for u in Usuario.objects.all()]}")
+    # usuario = Usuario.objects(correo__iexact=correo).first()
+    # print(f"Usuario encontrado: {usuario}")
 
-        # Verificar con hash si tiene salt, si no comparar plano (migración)
-        if usuario.salt:
-            hash_ingresado = _hash_password(contraseña, usuario.salt)
-            match = hash_ingresado == usuario.contraseña
-        else:
-            # Legacy: contraseña sin hash (solo durante migración)
-            match = usuario.contraseña == contraseña
+    if not usuario:
+        flash("Este correo no está registrado", "error")
+        return redirect(url_for("main.inicio"))
 
-        if not match:
-            flash("Contraseña incorrecta", "error")
-            return redirect(url_for("main.inicio"))
+    if usuario.salt:
+        hash_ingresado = _hash_password(contraseña, usuario.salt)
+        match = hash_ingresado == usuario.contraseña
+    else:
+        match = usuario.contraseña == contraseña
 
-        # Migrar a hash si aún no tiene salt
-        if not usuario.salt:
-            usuario.salt = secrets.token_hex(16)
-            usuario.contraseña = _hash_password(usuario.contraseña, usuario.salt)
-            session.commit()
+    if not match:
+        flash("Contraseña incorrecta", "error")
+        return redirect(url_for("main.inicio"))
 
-        login_user(usuario)
-        flash(f"¡Bienvenido, {usuario.nombre}!", "success")
-        return redirect(
-            request.args.get("next")
-            or request.form.get("next")
-            or url_for("main.inicio")
-        )
-    finally:
-        session.close()
+    if not usuario.salt:
+        usuario.salt = secrets.token_hex(16)
+        usuario.contraseña = _hash_password(contraseña, usuario.salt)
+        usuario.save()
+
+    login_user(usuario)
+    flash(f"¡Bienvenido, {usuario.nombre}!", "success")
+
+    return redirect(
+        request.args.get("next")
+        or request.form.get("next")
+        or url_for("main.inicio")
+    )
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -73,15 +72,13 @@ def register():
         flash("Todos los campos son obligatorios", "error")
         return redirect(url_for("main.inicio"))
 
-    session = SessionLocal()
+    existe = Usuario.objects(correo=correo).first()
+
+    if existe:
+        flash("Este correo ya está registrado. Inicia sesión.", "warning")
+        return redirect(url_for("main.inicio"))
+
     try:
-        existe = session.query(Usuario).filter_by(correo=correo).first()
-
-        if existe:
-            flash("Este correo ya está registrado. Inicia sesión.", "warning")
-            return redirect(url_for("main.inicio"))
-
-        # Generar salt y hash
         salt = secrets.token_hex(16)
         password_hash = _hash_password(contraseña, salt)
 
@@ -93,19 +90,15 @@ def register():
             tipo_usuario=1,
             direccion="",
         )
-        session.add(nuevo)
-        session.commit()
+        nuevo.save()
 
         login_user(nuevo)
         flash("¡Cuenta creada exitosamente!", "success")
         return redirect(url_for("main.inicio"))
 
     except Exception as e:
-        session.rollback()
         flash(f"Error al registrar: {str(e)}", "error")
         return redirect(url_for("main.inicio"))
-    finally:
-        session.close()
 
 
 @auth_bp.route("/logout")

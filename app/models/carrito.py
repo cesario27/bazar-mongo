@@ -8,9 +8,9 @@ from mongoengine import (
     FloatField,
     IntField,
     ListField,
+    ObjectIdField,
     StringField,
 )
-from mongoengine.base.metaclasses import ObjectIdField
 
 
 class DetalleCarrito(EmbeddedDocument):

@@ -2,7 +2,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
     {% for disco in discos %}
     <a
-        href="{#{ url_for('detalle_disco.detalle_disco', id=disco.id_disco, slug=disco.slug) }#}"
+        href="{{ url_for('detalle_disco.detalle_disco', id=disco.id_disco, slug=disco.slug) }}"
         class="group"
     >
         <div

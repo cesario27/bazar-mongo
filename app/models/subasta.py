@@ -1,7 +1,7 @@
 from typing import Any, ClassVar
 
 from mongoengine import (
-    DateField,
+    DateTimeField,
     Document,
     EmbeddedDocument,
     EmbeddedDocumentField,
@@ -16,16 +16,16 @@ class Puja(EmbeddedDocument):
     _id = ObjectIdField()
     id_puja = IntField()
     porcentaje = FloatField()
-    fecha = DateField()
+    fecha = DateTimeField()
     id_subasta = IntField()
     id_usuario = IntField()
 
 
 class Subastas(Document):
-    _id = IntField(primary_key=True)
+    id = IntField(primary_key=True)
     estado = IntField()
-    fecha_inicio = DateField()
-    fecha_fin = DateField()
+    fecha_inicio = DateTimeField()
+    fecha_fin = DateTimeField()
     id_disco = IntField()
     precio = FloatField()
     precio_minimo = FloatField()

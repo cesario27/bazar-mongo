@@ -2,7 +2,7 @@ from typing import ClassVar
 
 from mongoengine import (
     BooleanField,
-    DateField,
+    DateTimeField,
     Document,
     EmbeddedDocument,
     EmbeddedDocumentField,
@@ -16,14 +16,14 @@ class DetalleMovimiento(EmbeddedDocument):
     id_movimiento = IntField()
     id_disco = IntField()
     precio_unitario = FloatField()
-    id_detalle_movimiento = IntField()
+    # id_detalle_movimiento = IntField()
 
 
 class Movimiento(Document):
-    _id = IntField(primary_key=True)
+    id = IntField(primary_key=True)
     comision = FloatField()
     detalles = ListField(EmbeddedDocumentField(DetalleMovimiento))
-    fecha = DateField()
+    fecha = DateTimeField()
     id_usuario = IntField()
     tipo = BooleanField()
     total = FloatField()

@@ -2,7 +2,7 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
     {% for subasta in subastas %} {% set disco = subasta.disco %}
     <a
-        href="{#{ url_for('detalle_subasta.detalle_subasta', id_subasta=subasta.id_subasta, slug=disco.titulo|slugify) }#}"
+        href="{{ url_for('detalle_subasta.detalle_subasta', id_subasta=subasta.id, slug=disco.titulo|slugify) }}"
         class="group"
     >
         <div

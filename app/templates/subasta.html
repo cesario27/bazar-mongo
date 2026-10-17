@@ -491,7 +491,7 @@ Stereo{% endblock %} {% block content %}
     const precioConfirmacion = document.getElementById("precio-confirmacion");
     const botonesPuja = document.getElementById("botones-puja");
     const zonaConfirmacion = document.getElementById("zona-confirmacion");
-    const urlPujar = "{{ url_for('detalle_subasta.pujar', id_subasta=subasta.id_subasta, slug=slug) }}";
+    const urlPujar = "{{ url_for('detalle_subasta.pujar', id_subasta=subasta.id, slug=slug) }}";
     let pctSeleccionado = 0;
 
     function mostrarPrecio(pct) {

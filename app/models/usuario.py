@@ -1,11 +1,12 @@
 from typing import Any, ClassVar
 
+from flask_login import UserMixin
 from mongoengine import Document
 from mongoengine.fields import BooleanField, DateField, IntField, StringField
 
 
-class Usuario(Document):
-    id_usuario = IntField()
+class Usuario(UserMixin, Document):
+    id_usuario = IntField(primary_key=True)
     nombre = StringField()
     correo = StringField()
     contraseña = StringField()
@@ -18,3 +19,7 @@ class Usuario(Document):
     salt = StringField()
 
     objects: ClassVar[Any]
+    meta: ClassVar[dict] = {'collection': 'usuarios_final'}
+
+    def get_id(self):
+        return str(self.id_usuario)

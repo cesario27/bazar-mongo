@@ -24,6 +24,7 @@ class DetalleCarrito(EmbeddedDocument):
 
 class Carrito(Document):
     _id = ObjectIdField(primary_key=True)
+    # _id = IntField(primary_key=True)
     detalles = ListField(EmbeddedDocumentField(DetalleCarrito))
     total = FloatField()
     fecha_creacion = DateField()

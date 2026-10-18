@@ -101,7 +101,7 @@
                 <div class="grid grid-cols-1 gap-3">
                     <form
                         method="POST"
-                        action="{#{ url_for('carrito.comprar_ahora', id_disco=detalle_disco.id_disco) }#}"
+                        action="{{ url_for('carrito.comprar_ahora', id_disco=detalle_disco.id_disco) }}"
                     >
                         <button
                             type="submit"
@@ -111,7 +111,7 @@
                         </button>
                     </form>
                     <form
-                        hx-post="{#{ url_for('carrito.agregar_al_carrito', id_disco=detalle_disco.id_disco) }#}"
+                        hx-post="{{ url_for('carrito.agregar_al_carrito', id_disco=detalle_disco.id_disco) }}"
                         hx-target="#htmx-flash"
                         hx-swap="innerHTML"
                     >

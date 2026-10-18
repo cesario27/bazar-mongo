@@ -1,8 +1,8 @@
+from tokenize import String
 from typing import Any, ClassVar
 
 from flask_login import UserMixin
-from mongoengine import Document
-from mongoengine.fields import BooleanField, DateField, IntField, StringField
+from mongoengine import DateTimeField, Document, IntField, StringField
 
 
 class Usuario(UserMixin, Document):
@@ -10,16 +10,16 @@ class Usuario(UserMixin, Document):
     nombre = StringField()
     correo = StringField()
     contraseña = StringField()
-    tipo_usuario = BooleanField()
+    tipo_usuario = IntField()
     direccion = StringField()
-    fecha_registro = DateField()
+    fecha_registro = DateTimeField()
     icono_usuario = StringField()
-    tarjeta_numero = IntField()
-    tarjeta_vencimiento = DateField()
+    tarjeta_numero = StringField()
+    tarjeta_vencimiento = DateTimeField()
     salt = StringField()
 
     objects: ClassVar[Any]
-    meta: ClassVar[dict] = {'collection': 'usuarios_final'}
+    meta: ClassVar[dict] = {"collection": "usuarios_final"}
 
     def get_id(self):
         return str(self.id_usuario)

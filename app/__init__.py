@@ -6,6 +6,7 @@ from flask_login import LoginManager, current_user
 from flask_mail import Mail
 
 from app.base import conexion_mongo
+from app.controladores.admin import admin_bp
 from app.controladores.auth import auth_bp
 from app.controladores.carrito import carrito_bp
 from app.controladores.detalle_subasta import detalle_subasta_bp
@@ -15,6 +16,7 @@ from app.controladores.mi_cuenta import mi_cuenta_bp
 from app.controladores.rutas import main_bp
 from app.controladores.subastas import subasta_bp
 from app.controladores.utils import slugify
+from app.controladores.vendedor import vendedor_bp
 
 login_manager = LoginManager()
 mail = Mail()
@@ -74,11 +76,11 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(subasta_bp)
     app.register_blueprint(detalle_disco_bp)
-    # app.register_blueprint(vendedor_bp, url_prefix="/vendedor")
+    app.register_blueprint(vendedor_bp, url_prefix="/vendedor")
     app.register_blueprint(detalle_subasta_bp)
     app.register_blueprint(mi_cuenta_bp)
     app.register_blueprint(carrito_bp)
-    # app.register_blueprint(admin_bp)
+    app.register_blueprint(admin_bp)
 
     return app
 

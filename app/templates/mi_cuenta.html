@@ -236,8 +236,7 @@
                     class="textarea textarea-bordered w-full textarea-accent h-24"
                     placeholder="Tu dirección completa"
                 >
-{{ current_user.direccion or '' }}</textarea
-                >
+{{ current_user.direccion or '' }}</textarea>
             </div>
 
             <!-- ─── Cambio de contraseña ─── -->
@@ -448,26 +447,30 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% if pedidos %} {% for mov, det, disco in pedidos %}
+                    {% if pedidos %} {% for item in pedidos %}
                     <tr>
                         <td class="font-medium">
-                            {{ disco.titulo }} — {{ disco.artista }}
+                            {{ item.disco.titulo if item.disco else 'Disco
+                            desconocido' }} — {{ item.disco.artista if
+                            item.disco else '' }}
                         </td>
                         <td>
-                            {% if mov.tipo == 1 %}
+                            {% if item.movimiento.tipo == 1 %}
                             <span class="badge badge-success">Compra</span>
-                            {% elif mov.tipo == 2 %}
+                            {% elif item.movimiento.tipo == 2 %}
                             <span class="badge badge-warning">Subasta</span>
                             {% else %}
-                            <span class="badge badge-sm">{{ mov.tipo }}</span>
+                            <span class="badge badge-sm"
+                                >{{ item.movimiento.tipo }}</span
+                            >
                             {% endif %}
                         </td>
                         <td>
-                            {{ mov.fecha.strftime('%d/%m/%y') if mov.fecha else
-                            '-' }}
+                            {{ item.movimiento.fecha.strftime('%d/%m/%Y') if
+                            item.movimiento.fecha else '-' }}
                         </td>
                         <td class="font-semibold">
-                            ${{ "%.2f"|format(det.precio_unitario) }}
+                            ${{ "%.2f"|format(item.detalle.precio_unitario) }}
                         </td>
                     </tr>
                     {% endfor %} {% else %}

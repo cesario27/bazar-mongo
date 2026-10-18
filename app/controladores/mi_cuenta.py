@@ -8,10 +8,8 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app.models.disco import Disco
-
-# Ajusta las rutas de importación si tus modelos están en otra carpeta
-from app.models.movimiento import DetalleMovimiento, Movimiento
-from app.models.subasta import Puja
+from app.models.movimiento import Movimiento
+from app.models.subasta import Subastas
 from app.models.usuario import Usuario
 
 cloudinary.config(
@@ -51,65 +49,78 @@ _ENCRYPTION_KEY = "bazar_stereo_secret_key_2026"
 def mi_cuenta():
     # 1. Total de compras
     total_compras = Movimiento.objects(
-        id_usuario=current_user.id_usuario,
-        tipo=1
+        id_usuario=current_user.id_usuario, tipo=1
     ).count()
 
     # 2. Subastas ganadas
-    # Optimización: Solo revisamos subastas cerradas donde el usuario haya pujado
     subastas_ganadas = 0
-    subastas_cerradas = Subasta.objects(estado__ne=1).only('id_subasta')
+    subastas_cerradas = Subastas.objects(estado__ne=1).all()
 
     for sub in subastas_cerradas:
-        # Obtener la puja más alta para esta subasta
-        puja_ganadora = Puja.objects(id_subasta=sub.id_subasta).order_by('-porcentaje', '-fecha').first()
-        if puja_ganadora and puja_ganadora.id_usuario == current_user.id_usuario:
+        if not sub.pujas:
+            continue
+
+        pujas_ordenadas = sorted(
+            sub.pujas,
+            key=lambda p: (p.porcentaje, p.fecha if p.fecha else datetime.min),
+            reverse=True
+        )
+
+        puja_ganadora = pujas_ordenadas[0]
+
+        if puja_ganadora.id_usuario == current_user.id_usuario:
             subastas_ganadas += 1
 
-    # 3. Historial de pedidos (Simulación de JOIN eficiente)
-    # Paso A: Obtener los movimientos del usuario
-    movimientos = Movimiento.objects(
-        id_usuario=current_user.id_usuario,
-        tipo__in=[1, 2]
-    ).order_by('-fecha').all()
+    # 3. Historial de pedidos (CORREGIDO: Los detalles ya vienen en el movimiento)
+    movimientos = (
+        Movimiento.objects(id_usuario=current_user.id_usuario, tipo__in=[1, 2])
+        .order_by("-id")
+        .all()
+    )
 
-    mov_ids = [m.id_movimiento for m in movimientos]
     pedidos_data = []
 
-    if mov_ids:
-        # Paso B: Obtener todos los detalles de esos movimientos de una sola vez
-        detalles = DetalleMovimiento.objects(id_movimiento__in=mov_ids).all()
+    if movimientos:
+        # Paso A: Extraer todos los detalles de todos los movimientos en una sola lista
+        todos_los_detalles = []
+        for mov in movimientos:
+            for det in mov.detalles:  # ← Los detalles ya están aquí, no necesitas consultar
+                todos_los_detalles.append((mov, det))
 
-        # Paso C: Obtener todos los discos relacionados de una sola vez
-        disco_ids = list(set([d.id_disco for d in detalles]))
+        # Paso B: Obtener todos los discos relacionados de una sola vez
+        disco_ids = list(set([det.id_disco for _, det in todos_los_detalles]))
         discos_map = {
             d.id_disco: d
-            for d in Disco.objects(id_disco__in=disco_ids).only('id_disco', 'titulo', 'imagen', 'precio', 'artista')
+            for d in Disco.objects(id_disco__in=disco_ids).only(
+                "id_disco", "titulo", "imagen", "precio", "artista"
+            )
         }
 
-        # Paso D: Unir los datos en memoria (como haría un JOIN en SQL)
-        for mov in movimientos:
-            mov_detalles = [d for d in detalles if d.id_movimiento == mov.id_movimiento]
-            for det in mov_detalles:
-                pedidos_data.append({
-                    'movimiento': mov,
-                    'detalle': det,
-                    'disco': discos_map.get(det.id_disco)
-                })
+        # Paso C: Construir la lista de pedidos
+        for mov, det in todos_los_detalles:
+            pedidos_data.append(
+                {
+                    "movimiento": mov,
+                    "detalle": det,
+                    "disco": discos_map.get(det.id_disco),
+                }
+            )
 
     # 4. Desencriptar tarjeta para mostrar en el formulario
     tarjeta_mostrada = ""
     if current_user.tarjeta_numero:
         try:
-            tarjeta_mostrada = _decrypt_simple(current_user.tarjeta_numero, _ENCRYPTION_KEY)
+            tarjeta_mostrada = _decrypt_simple(
+                current_user.tarjeta_numero, _ENCRYPTION_KEY
+            )
         except Exception:
-            tarjeta_mostrada = current_user.tarjeta_numero  # Legacy sin encriptar
+            tarjeta_mostrada = current_user.tarjeta_numero
 
     return render_template(
         "mi_cuenta.html",
         total_compras=total_compras,
         subastas_ganadas=subastas_ganadas,
-        pedidos=pedidos_data,  # Pasamos la lista de diccionarios unidos
+        pedidos=pedidos_data,
         tarjeta_mostrada=tarjeta_mostrada,
     )
 
@@ -117,7 +128,6 @@ def mi_cuenta():
 @mi_cuenta_bp.route("/micuenta/actualizar", methods=["POST"])
 @login_required
 def actualizar_perfil():
-    # 1. Buscar usuario
     usuario = Usuario.objects(id_usuario=current_user.id_usuario).first()
     if not usuario:
         flash("Usuario no encontrado", "error")
@@ -131,13 +141,11 @@ def actualizar_perfil():
     contraseña_nueva = request.form.get("contraseña_nueva", "")
     contraseña_confirmar = request.form.get("contraseña_confirmar", "")
 
-    # 2. Actualizar campos básicos
     if nombre:
         usuario.nombre = nombre
     if direccion:
         usuario.direccion = direccion
 
-    # 3. Cambio de contraseña
     if contraseña_nueva:
         if usuario.salt:
             hash_actual = _hash_password(contraseña_actual, usuario.salt)
@@ -162,21 +170,19 @@ def actualizar_perfil():
         usuario.contraseña = _hash_password(contraseña_nueva, nuevo_salt)
         flash("Contraseña actualizada correctamente", "success")
 
-    # 4. Tarjeta: encriptar antes de guardar
     if tarjeta_numero:
         if not tarjeta_numero.isdigit() or len(tarjeta_numero) < 13:
             flash("Número de tarjeta inválido", "error")
             return redirect(url_for("mi_cuenta.mi_cuenta"))
         usuario.tarjeta_numero = _encrypt_simple(tarjeta_numero, _ENCRYPTION_KEY)
     else:
-        usuario.tarjeta_numero = None  # Limpiar si se envía vacío
+        usuario.tarjeta_numero = None
 
     if tarjeta_vencimiento:
         usuario.tarjeta_vencimiento = tarjeta_vencimiento
     else:
         usuario.tarjeta_vencimiento = None
 
-    # 5. Subida de imagen a Cloudinary
     imagen_file = request.files.get("icono_usuario")
     if imagen_file and imagen_file.filename:
         try:
@@ -190,7 +196,6 @@ def actualizar_perfil():
         except Exception as e:
             flash(f"Error al subir imagen: {str(e)}", "error")
 
-    # 6. Guardar todos los cambios en MongoDB
     try:
         usuario.save()
         flash("Perfil actualizado correctamente", "success")

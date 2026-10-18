@@ -17,7 +17,7 @@ from app.controladores.email import enviar_correo_confirmacion
 from app.controladores.utils import slugify
 from app.models.disco import Disco
 from app.models.movimiento import DetalleMovimiento, Movimiento
-from app.models.subasta import Puja, Subastas # Importamos Puja aquí arriba para mayor limpieza
+from app.models.subasta import Puja, Subastas
 from app.models.usuario import Usuario
 
 detalle_subasta_bp = Blueprint("detalle_subasta", __name__)
@@ -25,32 +25,27 @@ detalle_subasta_bp = Blueprint("detalle_subasta", __name__)
 
 @detalle_subasta_bp.route("/subasta/<int:id_subasta>-<slug>")
 def detalle_subasta(id_subasta, slug):
-    # 1. CAMBIO: Buscar por 'id=' en lugar de 'id_subasta='
     subasta = Subastas.objects(id=id_subasta).first()
     if not subasta:
         abort(404)
 
-    # 2. Buscar disco relacionado
     disco = Disco.objects(id_disco=subasta.id_disco).first()
     if not disco:
         abort(404)
 
-    # 3. Redirección 301 si el slug no coincide
     slug_correcto = slugify(disco.titulo)
     if slug != slug_correcto:
         return redirect(
             url_for(
                 "detalle_subasta.detalle_subasta",
-                id_subasta=subasta.id,  # <-- CAMBIO: Usar subasta.id
+                id_subasta=subasta.id,
                 slug=slug_correcto,
             ),
             code=301,
         )
 
-    # 4. Buscar vendedor
     vendedor = Usuario.objects(id_usuario=disco.id_usuario).first()
 
-    # 5. Calcular calificación del vendedor
     discos_ids = [
         d.id_disco for d in Disco.objects(id_usuario=disco.id_usuario).only("id_disco")
     ]
@@ -58,14 +53,23 @@ def detalle_subasta(id_subasta, slug):
     if discos_ids:
         movimientos_ids = Movimiento.objects(
             detalles__id_disco__in=discos_ids
-        ).distinct("id_movimiento")
+        ).distinct("id") # Corregido a "id"
         total_movimientos = len(movimientos_ids)
     else:
         total_movimientos = 0
 
     calificacion = round(min(5.0, 3.0 + (total_movimientos * 0.05)), 1)
 
-    # 6. Obtener pujas ordenadas
+    # ─── CORRECCIÓN DE FECHAS Y TUPLAS ───
+    # 1. Convertir fechas de string a datetime si es necesario
+    for p in subasta.pujas:
+        if isinstance(p.fecha, str):
+            try:
+                p.fecha = datetime.strptime(p.fecha, "%Y-%m-%d %H:%M:%S.%f")
+            except ValueError:
+                p.fecha = datetime.strptime(p.fecha, "%Y-%m-%d %H:%M:%S")
+
+    # 2. Ordenar pujas
     pujas_ordenadas = sorted(
         subasta.pujas, key=lambda p: (p.porcentaje, p.fecha), reverse=True
     )
@@ -80,39 +84,42 @@ def detalle_subasta(id_subasta, slug):
     if puja_maxima:
         min_pct = max(5, puja_maxima.porcentaje + 5)
 
-    # 7. Verificar cierre de subasta
     ahora = datetime.now()
     if subasta.fecha_fin and subasta.estado == 1 and ahora > subasta.fecha_fin:
-        subasta.estado = 0  # Cerrada
+        subasta.estado = 0
 
         if precio_actual >= float(subasta.precio_minimo):
-            disco.estado = 2  # Vendido
+            disco.estado = 2
 
             if precio_actual > 20000:
                 comision = round(precio_actual * 0.16, 2)
             else:
                 comision = round(precio_actual * 0.11, 2)
 
-            max_id_mov = Movimiento.objects.order_by("-id_movimiento").first()
-            nuevo_id_mov = (max_id_mov.id_movimiento if max_id_mov else 0) + 1
+            # ─── CORRECCIÓN MOVIMIENTO Y DETALLE ───
+            max_id_mov = Movimiento.objects.order_by("-id").first()
+            nuevo_id_mov = (max_id_mov.id if max_id_mov else 0) + 1
 
             movimiento = Movimiento(
-                id_movimiento=nuevo_id_mov,
+                id=nuevo_id_mov,
                 tipo=2,
                 fecha=ahora,
                 total=precio_actual,
                 id_usuario=puja_maxima.id_usuario if puja_maxima else disco.id_usuario,
                 comision=comision,
+                detalles=[]
             )
-            movimiento.save()
 
             if puja_maxima:
-                det_mov = DetalleMovimiento(
-                    id_movimiento=nuevo_id_mov,
-                    id_disco=disco.id_disco,
-                    precio_unitario=float(subasta.precio),
+                # Se agrega a la lista de documentos embebidos
+                movimiento.detalles.append(
+                    DetalleMovimiento(
+                        id_movimiento=nuevo_id_mov,
+                        id_disco=disco.id_disco,
+                        precio_unitario=float(subasta.precio),
+                    )
                 )
-                det_mov.save()
+            movimiento.save()
         else:
             disco.estado = 0
 
@@ -133,7 +140,6 @@ def detalle_subasta(id_subasta, slug):
             except Exception as e:
                 current_app.logger.error(f"Error enviando correo subasta: {e}")
 
-    # 8. Determinar si el usuario actual es ganador
     es_ganador = False
     if (
         subasta.estado != 1
@@ -149,12 +155,22 @@ def detalle_subasta(id_subasta, slug):
     precio_base = float(subasta.precio)
     ultima_puja_pct = puja_maxima.porcentaje if puja_maxima else 0
 
+    # ─── CONSTRUIR TUPLAS (PUJA, USUARIO) PARA EL TEMPLATE ───
+    usuarios_ids = [p.id_usuario for p in pujas_ordenadas]
+    usuarios_map = {
+        u.id_usuario: u for u in Usuario.objects(id_usuario__in=usuarios_ids)
+    }
+
+    pujas_con_usuario = [
+        (p, usuarios_map.get(p.id_usuario)) for p in pujas_ordenadas
+    ]
+
     return render_template(
         "subasta.html",
         subasta=subasta,
         disco=disco,
         vendedor=vendedor,
-        pujas=pujas_ordenadas,
+        pujas=pujas_con_usuario,
         puja_maxima=puja_maxima,
         precio_actual=round(precio_actual, 2),
         es_ganador=es_ganador,
@@ -170,7 +186,6 @@ def detalle_subasta(id_subasta, slug):
 @detalle_subasta_bp.route("/subasta/<int:id_subasta>-<slug>/pujar", methods=["POST"])
 @login_required
 def pujar(id_subasta, slug):
-    # 1. CAMBIO: Buscar por 'id='
     subasta = Subastas.objects(id=id_subasta).first()
     if not subasta or subasta.estado != 1:
         flash("La subasta no está activa", "error")
@@ -193,7 +208,7 @@ def pujar(id_subasta, slug):
         return redirect(
             url_for(
                 "detalle_subasta.detalle_subasta",
-                id_subasta=subasta.id, # <-- CAMBIO
+                id_subasta=subasta.id,
                 slug=slugify(disco.titulo),
             )
         )
@@ -204,6 +219,13 @@ def pujar(id_subasta, slug):
         return redirect(
             url_for("detalle_subasta.detalle_subasta", id_subasta=id_subasta, slug=slug)
         )
+
+    for p in subasta.pujas:
+        if isinstance(p.fecha, str):
+            try:
+                p.fecha = datetime.strptime(p.fecha, "%Y-%m-%d %H:%M:%S.%f")
+            except ValueError:
+                p.fecha = datetime.strptime(p.fecha, "%Y-%m-%d %H:%M:%S")
 
     pujas_ordenadas = sorted(subasta.pujas, key=lambda p: p.porcentaje, reverse=True)
     puja_maxima = pujas_ordenadas[0] if pujas_ordenadas else None
@@ -228,7 +250,7 @@ def pujar(id_subasta, slug):
         id_puja=nuevo_id,
         porcentaje=porcentaje,
         fecha=datetime.now(),
-        id_subasta=subasta.id,  # <-- CAMBIO CLAVE: Usamos subasta.id para llenar el campo del EmbeddedDocument
+        id_subasta=subasta.id,
         id_usuario=current_user.id_usuario,
     )
 

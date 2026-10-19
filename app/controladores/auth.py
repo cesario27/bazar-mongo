@@ -82,7 +82,11 @@ def register():
         salt = secrets.token_hex(16)
         password_hash = _hash_password(contraseña, salt)
 
+        ultimo = Usuario.objects.order_by("-id_usuario").first()
+        nuevo_id = (ultimo.id_usuario + 1) if ultimo else 1
+
         nuevo = Usuario(
+            id_usuario=nuevo_id,
             nombre=nombre,
             correo=correo,
             contraseña=password_hash,

@@ -5,7 +5,7 @@ from flask import Blueprint, abort, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 from app.models.disco import Disco
-from app.models.movimiento import Movimiento
+from app.models.movimiento import DetalleMovimiento, Movimiento
 from app.models.usuario import Usuario
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -116,63 +116,69 @@ def eliminar_usuario(id):
 
 # ─── Ventas ─── #
 
+from collections import defaultdict
+# Asegúrate de importar defaultdict al inicio de admin.py
 
 @admin_bp.route("/ventas")
 @admin_required
 def ventas():
     movimientos = list(Movimiento.objects.order_by("-fecha").limit(100))
 
-    pipeline = [
-        {"$unwind": "$detalles"},
-        {
-            "$lookup": {
-                "from": Disco._get_collection_name(),
-                "localField": "detalles.id_disco",
-                "foreignField": "id_disco",
-                "as": "disco_info",
-            }
-        },
-        {"$unwind": "$disco_info"},
-        {
-            "$group": {
-                "_id": "$disco_info.id_usuario",
-                "total_ventas_ids": {"$addToSet": "$id"},
-                "ingresos": {"$sum": "$detalles.precio_unitario"},
-                "discos_vendidos": {"$sum": 1},
-            }
-        },
-        {"$sort": {"ingresos": -1}},
-        {"$limit": 10},
-    ]
-    raw_top = list(Movimiento.objects.aggregate(*pipeline))
+    # Diccionario para acumular las ventas por id_usuario (vendedor)
+    vendedores_agg = defaultdict(lambda: {"total_ventas": set(), "ingresos": 0.0, "discos_vendidos": 0})
 
+    # 1. Recolectar todos los IDs de discos involucrados
+    ids_discos = set()
+    for mov in movimientos:
+        for det in (mov.detalles or []):
+            if det.id_disco:
+                ids_discos.add(det.id_disco)
+
+    # 2. Hacer una sola consulta a la BD para obtener esos discos
+    discos_map = {d.id_disco: d for d in Disco.objects(id_disco__in=list(ids_discos))}
+
+    # 3. Procesar las ventas
+    for mov in movimientos:
+        for det in (mov.detalles or []):
+            disco = discos_map.get(det.id_disco)
+            if disco and disco.id_usuario:
+                v = vendedores_agg[disco.id_usuario]
+                # Usamos mov.id para contar transacciones únicas
+                v["total_ventas"].add(mov.id)
+                v["ingresos"] += float(det.precio_unitario or 0)
+                v["discos_vendidos"] += 1
+
+    # 4. Obtener los datos de los usuarios vendedores
     usuarios_map = {
         u.id_usuario: u
-        for u in Usuario.objects(id_usuario__in=[r["_id"] for r in raw_top])
+        for u in Usuario.objects(id_usuario__in=list(vendedores_agg.keys()))
     }
 
+    # 5. Construir la lista de TopVendedor y ordenarla
     top_vendedores = []
-    for r in raw_top:
-        u = usuarios_map.get(r["_id"])
-        if not u:
-            continue
-        top_vendedores.append(
-            TopVendedor(
-                id_usuario=r["_id"],
-                nombre=u.nombre,
-                icono_usuario=u.icono_usuario,
-                total_ventas=len(r["total_ventas_ids"]),
-                ingresos=r["ingresos"],
-                discos_vendidos=r["discos_vendidos"],
+    for id_user, data in vendedores_agg.items():
+        u = usuarios_map.get(id_user)
+        if u:
+            top_vendedores.append(
+                TopVendedor(
+                    id_usuario=id_user,
+                    nombre=u.nombre,
+                    icono_usuario=u.icono_usuario,
+                    total_ventas=len(data["total_ventas"]),
+                    ingresos=data["ingresos"],
+                    discos_vendidos=data["discos_vendidos"]
+                )
             )
-        )
+
+    # Ordenar por ingresos de mayor a menor y tomar los primeros 10
+    top_vendedores.sort(key=lambda x: x.ingresos, reverse=True)
+    top_vendedores = top_vendedores[:10]
 
     return render_template(
         "admin/ventas.html",
         movimientos=movimientos,
         top_vendedores=top_vendedores,
     )
-
 
 # ─── Discos ─── #
 

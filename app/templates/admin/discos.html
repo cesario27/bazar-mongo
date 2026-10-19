@@ -50,6 +50,7 @@ content %}
                                 </div>
                             </td>
                             <td>
+                                {% if vendedor %}
                                 <div class="flex items-center gap-2">
                                     <div class="avatar">
                                         <div class="w-6 rounded-full">
@@ -62,15 +63,16 @@ content %}
                                             <div
                                                 class="bg-neutral text-neutral-content flex items-center justify-center font-bold text-xs w-full h-full"
                                             >
-                                                {{ vendedor.nombre[0]|upper }}
+                                                {{ vendedor.nombre[0]|upper if vendedor.nombre else '?' }}
                                             </div>
                                             {% endif %}
                                         </div>
                                     </div>
-                                    <span class="text-sm"
-                                        >{{ vendedor.nombre }}</span
-                                    >
+                                    <span class="text-sm">{{ vendedor.nombre }}</span>
                                 </div>
+                                {% else %}
+                                <span class="text-sm text-error font-semibold italic">Vendedor eliminado</span>
+                                {% endif %}
                             </td>
                             <td>
                                 <span

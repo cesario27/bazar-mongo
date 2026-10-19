@@ -25,7 +25,7 @@ content %}
                             {% for m in movimientos %}
                             <tr>
                                 <td class="font-mono">
-                                    #{{ m.id_movimiento }}
+                                    #{{ m.id }}
                                 </td>
                                 <td class="text-sm opacity-80">
                                     {{ m.fecha.strftime('%d/%m/%Y %H:%M') if

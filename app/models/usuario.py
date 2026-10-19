@@ -1,4 +1,4 @@
-from tokenize import String
+from datetime import datetime, timezone
 from typing import Any, ClassVar
 
 from flask_login import UserMixin
@@ -12,10 +12,10 @@ class Usuario(UserMixin, Document):
     contraseña = StringField()
     tipo_usuario = IntField()
     direccion = StringField()
-    fecha_registro = DateTimeField()
+    fecha_registro = DateTimeField(default=lambda: datetime.now(timezone.utc))
     icono_usuario = StringField()
     tarjeta_numero = StringField()
-    tarjeta_vencimiento = DateTimeField()
+    tarjeta_vencimiento = StringField()
     salt = StringField()
 
     objects: ClassVar[Any]
